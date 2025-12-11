@@ -1,44 +1,71 @@
-# Vue 3 boilerplate (Vite + TypeScript)
+# Gambaran Struktur Proyek
 
-Starter with a scalable, feature-first structure, routing, global styles, and Pinia state already wired.
+Boilerplate Vue 3 (Vite + TypeScript) dengan pola feature-first, router terorganisir, guard, dan Pinia.
 
-## Folder layout
+## Struktur folder
 
 ```
-src
-├─ assets/             # static assets (images, fonts)
-├─ components/         # ui building blocks (base + common)
-├─ composables/        # reusable logic (e.g., useAsyncTask)
-├─ features/           # feature-first views/components
-│  ├─ home/pages/HomePage.vue
-│  └─ misc/pages/NotFoundPage.vue
-├─ layouts/            # page shells (DefaultLayout.vue)
-├─ router/             # routes + hooks
-├─ services/           # API / infrastructure clients (httpClient.ts)
-├─ stores/             # Pinia stores
-├─ styles/             # global styles and design tokens
-└─ main.ts             # app bootstrap
+.
+├─ public/                    # aset statis
+├─ src/
+│  ├─ app/                    # application shell
+│  │  ├─ App.vue
+│  │  ├─ main.ts
+│  │  ├─ layouts/
+│  │  │  ├─ DefaultLayout.vue
+│  │  │  └─ AuthLayout.vue
+│  │  ├─ router/
+│  │  │  ├─ index.ts          # router instance + guard setup
+│  │  │  ├─ routes.ts         # definisi routes
+│  │  │  └─ guards.ts         # navigation guards
+│  │  └─ styles/
+│  │     ├─ main.css
+│  │     └─ variables.css     # token warna/spacing
+│  │
+│  ├─ features/               # modul per fitur/domain
+│  │  ├─ auth/
+│  │  │  ├─ components/LoginForm.vue
+│  │  │  ├─ pages/LoginPage.vue
+│  │  │  ├─ services/authService.ts
+│  │  │  └─ stores/authStore.ts
+│  │  ├─ home/pages/HomePage.vue
+│  │  └─ misc/pages/NotFoundPage.vue
+│  │
+│  └─ shared/                 # utilitas lintas fitur
+│     ├─ components/
+│     │  ├─ common/AppHeader.vue
+│     │  └─ ui/{Button.vue,Input.vue}
+│     ├─ composables/{useAsyncTask.ts,useAuth.ts}
+│     ├─ constants/index.ts
+│     ├─ lib/{utils.ts,validators.ts}
+│     ├─ services/
+│     │  ├─ api/index.ts
+│     │  └─ httpClient.ts
+│     ├─ stores/counter.ts
+│     └─ types/{index.ts,api.types.ts}
+│
+├─ index.html
+├─ package.json
+├─ pnpm-lock.yaml
+├─ tsconfig*.json
+├─ vite.config.ts
+└─ .env.example
 ```
 
-Key conventions:
-- Feature-first: group pages, components, and services by domain inside `features/`.
-- Components: `components/base` for low-level UI primitives; `components/common` for shared structural pieces.
-- Routing: `router/routes.ts` exports typed routes; meta titles propagate via `router.afterEach`.
-- State: Pinia is ready; `stores/counter.ts` is an example of setup-style store.
-- Styling: `styles/main.css` defines tokens/typography and is imported once in `main.ts`.
-- Services: `services/httpClient.ts` is a small fetch wrapper to centralize API calls.
+## Catatan utama
 
-## Commands
+- Router: `routes.ts` mendefinisikan rute, `guards.ts` menangani meta `requiresAuth` dan `guestOnly`, serta update `document.title`.
+- Layout: `DefaultLayout` untuk halaman utama, `AuthLayout` untuk login/register.
+- Shared UI: komponen dasar (`Button`, `Input`) dan komponen umum (`AppHeader`) bisa dipakai lintas fitur.
+- Auth contoh: `features/auth` berisi page, form, store Pinia, dan service API dengan fallback mock.
+- Styling: token warna/spacing di `variables.css`, gaya dasar di `main.css`.
+
+## Script dasar
 
 ```sh
-pnpm install   # install deps
-pnpm dev       # start dev server
-pnpm build     # type-check + production build
-pnpm lint      # eslint with caching
-pnpm format    # prettier on src/
+pnpm install   # instal dependensi
+pnpm dev       # jalankan dev server
+pnpm build     # type-check + build produksi
+pnpm lint      # jalankan eslint
+pnpm format    # jalankan prettier di src/
 ```
-
-## Recommended tooling
-
-- VS Code + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (disable Vetur).
-- Browser devtools: [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd) (Chrome/Edge) or [Firefox addon](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/).
