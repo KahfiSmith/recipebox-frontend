@@ -22,12 +22,12 @@ const handleSubmit = async () => {
   error.value = ''
 
   if (!isEmail(form.email)) {
-    error.value = 'Email tidak valid'
+    error.value = 'Invalid email address'
     return
   }
 
   if (!isMinLength(form.password, 6)) {
-    error.value = 'Password minimal 6 karakter'
+    error.value = 'Password must be at least 6 characters'
     return
   }
 
@@ -37,7 +37,7 @@ const handleSubmit = async () => {
     const redirect = (route.query.redirect as string | undefined) ?? '/'
     router.push(redirect)
   } catch (err) {
-    error.value = err instanceof Error ? err.message : 'Gagal login'
+    error.value = err instanceof Error ? err.message : 'Login failed'
   } finally {
     loading.value = false
   }
@@ -47,8 +47,8 @@ const handleSubmit = async () => {
 <template>
   <form class="space-y-5" @submit.prevent="handleSubmit">
     <div class="space-y-2">
-      <h1 class="text-2xl font-semibold text-slate-900">Masuk</h1>
-      <p class="text-sm text-slate-600">Gunakan akun demo untuk melanjutkan.</p>
+      <h1 class="text-2xl font-semibold text-slate-900">Log in</h1>
+      <p class="text-sm text-slate-600">Use the demo account to continue.</p>
     </div>
 
     <Input v-model="form.email" label="Email" name="email" placeholder="you@mail.com" required />
@@ -66,7 +66,7 @@ const handleSubmit = async () => {
     </p>
 
     <Button class="w-full" :disabled="loading">
-      {{ loading ? 'Memproses...' : 'Login' }}
+      {{ loading ? 'Signing in...' : 'Login' }}
     </Button>
   </form>
 </template>
