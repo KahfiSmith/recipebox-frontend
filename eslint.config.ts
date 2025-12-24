@@ -1,5 +1,6 @@
 import { defineConfigWithVueTs, vueTsConfigs } from '@vue/eslint-config-typescript'
 import pluginVue from 'eslint-plugin-vue'
+import type { Linter } from 'eslint'
 import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
 
 // To allow more languages other than `ts` in `.vue` files, uncomment the following lines:
@@ -31,4 +32,4 @@ export default defineConfigWithVueTs(
       '@typescript-eslint/no-empty-object-type': 'off',
     },
   },
-)
+) as Linter.FlatConfig[]
