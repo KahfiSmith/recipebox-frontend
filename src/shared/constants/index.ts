@@ -1,1 +1,1 @@
-export const APP_NAME = 'Vue Boilerplate'
+export const APP_NAME = 'Recipe Box'
