@@ -1,6 +1,14 @@
 @layer base {
   :root {
     --radius: 0.625rem;
+
+    /* Recipebox palette */
+    --recipe-ink: #383430;
+    --recipe-mint: #79c39f;
+    --recipe-sand: #ead1b5;
+    --recipe-peach: #ee9b6a;
+    --recipe-orange: #e77742;
+
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
@@ -74,6 +82,14 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Recipebox palette (Tailwind colors) */
+  --color-recipe-ink: var(--recipe-ink);
+  --color-recipe-mint: var(--recipe-mint);
+  --color-recipe-sand: var(--recipe-sand);
+  --color-recipe-peach: var(--recipe-peach);
+  --color-recipe-orange: var(--recipe-orange);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

@@ -9,7 +9,19 @@ const baseRoutes: RouteRecordRaw[] = [
         path: '',
         name: 'home',
         component: () => import('@/features/home/pages/HomePage.vue'),
-        meta: { title: 'Home' },
+        meta: { title: 'Recipe Manager' },
+      },
+    ],
+  },
+  {
+    path: '/app',
+    component: () => import('@/app/layouts/DefaultLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'app',
+        component: () => import('@/features/app/pages/AppPage.vue'),
+        meta: { title: 'App' },
       },
     ],
   },
