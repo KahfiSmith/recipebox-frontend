@@ -22,11 +22,11 @@ const { as, variant, size } = toRefs(props)
 const classes = computed(() => [
   'inline-flex items-center justify-center rounded-lg font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60',
   {
-    'bg-[color:var(--recipe-orange)] text-white hover:opacity-90 focus-visible:ring-[color:var(--recipe-mint)]':
+    'bg-recipe-orange text-white hover:opacity-90 focus-visible:ring-recipe-mint':
       variant.value === 'primary',
-    'border border-[color:var(--recipe-sand)] bg-white text-[color:var(--recipe-ink)] hover:bg-[color:color-mix(in_oklab,var(--recipe-sand),white_60%)] focus-visible:ring-[color:var(--recipe-mint)]':
+    'border border-recipe-sand bg-white text-recipe-ink hover:bg-recipe-sand-w60 focus-visible:ring-recipe-mint':
       variant.value === 'secondary',
-    'text-[color:var(--recipe-ink)] hover:bg-[color:color-mix(in_oklab,var(--recipe-sand),white_65%)] focus-visible:ring-[color:var(--recipe-mint)]':
+    'text-recipe-ink hover:bg-recipe-sand-w65 focus-visible:ring-recipe-mint':
       variant.value === 'ghost',
   },
   {
