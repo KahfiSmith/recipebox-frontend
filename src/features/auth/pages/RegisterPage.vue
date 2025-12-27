@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import LoginForm from '@/features/auth/components/LoginForm.vue'
+import RegisterForm from '@/features/auth/components/RegisterForm.vue'
 </script>
 
 <template>
@@ -8,10 +8,10 @@ import LoginForm from '@/features/auth/components/LoginForm.vue'
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-recipe-orange">
         Authentication
       </p>
-      <h1 class="text-2xl font-semibold text-recipe-ink">Welcome back</h1>
-      <p class="text-sm text-slate-600">Log in to continue.</p>
+      <h1 class="text-2xl font-semibold text-recipe-ink">Create your account</h1>
+      <p class="text-sm text-slate-600">Sign up to start saving recipes.</p>
     </div>
 
-    <LoginForm />
+    <RegisterForm />
   </section>
 </template>
