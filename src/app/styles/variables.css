@@ -86,9 +86,27 @@
   /* Recipebox palette (Tailwind colors) */
   --color-recipe-ink: var(--recipe-ink);
   --color-recipe-mint: var(--recipe-mint);
+  --color-recipe-mint-w60: color-mix(in oklab, var(--recipe-mint), white 60%);
+  --color-recipe-mint-w70: color-mix(in oklab, var(--recipe-mint), white 70%);
+  --color-recipe-mint-w82: color-mix(in oklab, var(--recipe-mint), white 82%);
+  --color-recipe-mint-w88: color-mix(in oklab, var(--recipe-mint), white 88%);
   --color-recipe-sand: var(--recipe-sand);
+  --color-recipe-sand-w40: color-mix(in oklab, var(--recipe-sand), white 40%);
+  --color-recipe-sand-w55: color-mix(in oklab, var(--recipe-sand), white 55%);
+  --color-recipe-sand-w60: color-mix(in oklab, var(--recipe-sand), white 60%);
+  --color-recipe-sand-w65: color-mix(in oklab, var(--recipe-sand), white 65%);
+  --color-recipe-sand-w70: color-mix(in oklab, var(--recipe-sand), white 70%);
+  --color-recipe-sand-w75: color-mix(in oklab, var(--recipe-sand), white 75%);
+  --color-recipe-sand-w80: color-mix(in oklab, var(--recipe-sand), white 80%);
+  --color-recipe-sand-b10: color-mix(in oklab, var(--recipe-sand), black 10%);
+  --color-recipe-sand-b12: color-mix(in oklab, var(--recipe-sand), black 12%);
   --color-recipe-peach: var(--recipe-peach);
+  --color-recipe-peach-w78: color-mix(in oklab, var(--recipe-peach), white 78%);
   --color-recipe-orange: var(--recipe-orange);
+  --color-recipe-orange-w70: color-mix(in oklab, var(--recipe-orange), white 70%);
+  --color-recipe-orange-w85: color-mix(in oklab, var(--recipe-orange), white 85%);
+  --color-recipe-orange-b8: color-mix(in oklab, var(--recipe-orange), black 8%);
+  --color-recipe-orange-b35: color-mix(in oklab, var(--recipe-orange), black 35%);
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
