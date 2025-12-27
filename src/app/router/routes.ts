@@ -35,6 +35,12 @@ const baseRoutes: RouteRecordRaw[] = [
         component: () => import('@/features/auth/pages/LoginPage.vue'),
         meta: { title: 'Login', guestOnly: true },
       },
+      {
+        path: 'register',
+        name: 'register',
+        component: () => import('@/features/auth/pages/RegisterPage.vue'),
+        meta: { title: 'Register', guestOnly: true },
+      },
     ],
   },
   {
