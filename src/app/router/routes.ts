@@ -41,6 +41,18 @@ const baseRoutes: RouteRecordRaw[] = [
         component: () => import('@/features/auth/pages/RegisterPage.vue'),
         meta: { title: 'Register', guestOnly: true },
       },
+      {
+        path: 'forgot-password',
+        name: 'forgot-password',
+        component: () => import('@/features/auth/pages/ForgotPasswordPage.vue'),
+        meta: { title: 'Forgot Password', guestOnly: true },
+      },
+      {
+        path: 'verify-email',
+        name: 'verify-email',
+        component: () => import('@/features/auth/pages/VerifyEmailPage.vue'),
+        meta: { title: 'Verify Email', guestOnly: true },
+      },
     ],
   },
   {
