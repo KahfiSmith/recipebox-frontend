@@ -17,6 +17,9 @@ import { Button } from '@/shared/components/ui'
       <RouterLink to="/auth/login">
         <Button>Login</Button>
       </RouterLink>
+      <RouterLink to="/app/profile">
+        <Button variant="secondary">Profile</Button>
+      </RouterLink>
     </div>
   </section>
 </template>
