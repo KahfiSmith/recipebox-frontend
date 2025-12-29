@@ -11,15 +11,9 @@ import { Button } from '@/shared/components/ui'
       This page is reserved for the main app later. For now it’s just a UI placeholder.
     </p>
     <div class="flex flex-wrap gap-3">
-      <RouterLink to="/">
-        <Button variant="secondary">Back to Landing</Button>
-      </RouterLink>
-      <RouterLink to="/auth/login">
-        <Button>Login</Button>
-      </RouterLink>
-      <RouterLink to="/app/profile">
-        <Button variant="secondary">Profile</Button>
-      </RouterLink>
+      <Button :as="RouterLink" to="/" variant="secondary">Back to Landing</Button>
+      <Button :as="RouterLink" to="/auth/login">Login</Button>
+      <Button :as="RouterLink" to="/app/profile" variant="secondary">Profile</Button>
     </div>
   </section>
 </template>
