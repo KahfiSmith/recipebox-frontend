@@ -65,12 +65,10 @@ const benefits = [
         automatically.
       </p>
       <div class="flex flex-wrap gap-3">
-        <RouterLink to="/app">
-          <Button>Open App</Button>
-        </RouterLink>
-        <RouterLink :to="{ path: '/', hash: '#features' }">
-          <Button variant="secondary">See features</Button>
-        </RouterLink>
+        <Button :as="RouterLink" to="/app">Open App</Button>
+        <Button :as="RouterLink" :to="{ path: '/', hash: '#features' }" variant="secondary">
+          See features
+        </Button>
       </div>
     </div>
 
@@ -233,9 +231,7 @@ const benefits = [
         Open the app and start organizing recipes, shopping, and meal plans.
       </p>
       <div class="mt-6">
-        <RouterLink to="/app">
-          <Button variant="secondary">Open App</Button>
-        </RouterLink>
+        <Button :as="RouterLink" to="/app" variant="secondary">Open App</Button>
       </div>
     </div>
   </section>

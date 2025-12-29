@@ -13,8 +13,6 @@ import { Button } from '@/shared/components/ui'
     <p class="max-w-md text-sm text-slate-600">
       The page you are looking for doesn’t exist or has moved. Check the URL or head back home.
     </p>
-    <RouterLink to="/">
-      <Button variant="secondary">Back to home</Button>
-    </RouterLink>
+    <Button :as="RouterLink" to="/" variant="secondary">Back to home</Button>
   </section>
 </template>
