@@ -36,9 +36,7 @@ import { APP_NAME } from '@/shared/constants'
         >
           Preview
         </RouterLink>
-        <RouterLink to="/app">
-          <Button>Open App</Button>
-        </RouterLink>
+        <Button :as="RouterLink" to="/app">Open App</Button>
       </nav>
     </div>
   </header>

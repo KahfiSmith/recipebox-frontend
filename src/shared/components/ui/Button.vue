@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { computed, toRefs } from 'vue'
+import type { Component } from 'vue'
 
 type Variant = 'primary' | 'secondary' | 'ghost'
 type Size = 'sm' | 'md' | 'lg'
+type ButtonAs = 'button' | 'a' | Component
 
 const props = withDefaults(
   defineProps<{
-    as?: 'button' | 'a'
+    as?: ButtonAs
     variant?: Variant
     size?: Size
   }>(),
