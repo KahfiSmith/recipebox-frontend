@@ -9,6 +9,15 @@ Frontend untuk aplikasi Recipebox berbasis Vue 3 + Vite + TypeScript dengan stru
 - Tailwind CSS (via `@tailwindcss/vite`) + konfigurasi `components.json` (shadcn-vue)
 - ESLint + Prettier
 
+## Status fitur saat ini
+
+- Landing page `/` sudah lengkap: Hero, Features, How it works, Preview, Benefits, CTA, Footer.
+- Preview landing sudah berisi mockup realistis (recipe list, weekly plan, shopping list) berbasis data statis.
+- Auth flow sudah tersedia (UI + validasi dasar): login, register, forgot password, verify email.
+- Route guard aktif untuk `requiresAuth` dan `guestOnly`.
+- Halaman `/app` masih placeholder untuk aplikasi utama.
+- Halaman `/app/profile` sudah tersedia (form profile, preferences, dan update password di sisi client).
+
 ## Prasyarat
 
 - Node.js: `^20.19.0 || >=22.12.0`
@@ -73,7 +82,9 @@ pnpm format     # prettier untuk src/
 │  │  │  ├─ pages/LoginPage.vue
 │  │  │  ├─ services/authService.ts
 │  │  │  └─ stores/authStore.ts
+│  │  ├─ app/pages/AppPage.vue     # placeholder app shell
 │  │  ├─ home/pages/HomePage.vue
+│  │  ├─ profile/pages/ProfilePage.vue
 │  │  └─ misc/pages/NotFoundPage.vue
 │  │
 │  └─ shared/                      # utilitas lintas fitur
@@ -82,8 +93,6 @@ pnpm format     # prettier untuk src/
 │     │  └─ ui/                    # komponen UI (shadcn-vue style)
 │     │     ├─ Button.vue
 │     │     ├─ Input.vue
-│     │     ├─ button.ts
-│     │     ├─ input.ts
 │     │     └─ index.ts
 │     ├─ composables/              # hooks reusable (mis. auth, async task)
 │     ├─ constants/

@@ -1,178 +1,90 @@
-# Ringkasan Proyek – Recipe Manager 🍳
+# Ringkasan Proyek – Recipe Box Frontend
 
-## 1. Gambaran Umum
+## 1. Gambaran umum
 
-Recipe Manager adalah aplikasi web untuk membantu pengguna:
+Repo ini adalah frontend aplikasi **Recipe Box / Recipe Manager** berbasis:
 
-- Menyimpan dan mengelola resep masakan.
-- Mencari resep berdasarkan bahan yang tersedia di rumah.
-- Membuat daftar belanja otomatis dari resep yang dipilih.
-- Menyusun rencana makan (meal plan) dalam bentuk kalender harian/mingguan.
+- Vue 3 + Vite + TypeScript
+- Vue Router + Pinia
+- Tailwind CSS
 
-Proyek ini dibangun dengan arsitektur **frontend–backend terpisah**:
+Arsitektur memakai pendekatan **feature-first** agar kode mudah dipisah per domain fitur dan lebih gampang dikembangkan.
 
-- **Frontend**: Vue.js (repo ini)
-- **Backend**: Go (Golang) – direncanakan sebagai REST API terpisah
+## 2. Kondisi implementasi saat ini
 
-Fase awal fokus ke **frontend** terlebih dahulu (UI dan struktur aplikasi), kemudian dilanjutkan dengan integrasi ke backend Go.
+### Yang sudah jadi
 
----
+1. Landing page lengkap di route `/`:
+   - Hero
+   - Features
+   - How it works
+   - Preview
+   - Benefits
+   - CTA
+   - Footer
 
-## 2. Tujuan & Arah Pengembangan
+2. Preview section sudah terisi mockup realistis:
+   - Ringkasan meal mingguan
+   - Recipe list sample
+   - Weekly plan sample
+   - Shopping list sample
 
-### Tujuan utama
+3. Authentication flow (UI + validasi dasar):
+   - `/auth/login`
+   - `/auth/register`
+   - `/auth/forgot-password`
+   - `/auth/verify-email`
 
-1. Menyediakan antarmuka yang sederhana dan nyaman untuk:
-   - Menambahkan, melihat, dan mengelola resep.
-   - Mencari resep berdasarkan bahan.
-   - Mengelola daftar belanja.
-   - Menyusun meal plan.
+4. Route guard:
+   - `requiresAuth` untuk halaman private
+   - `guestOnly` untuk halaman auth
+   - Redirect login saat belum autentikasi
 
-2. Membuat fondasi frontend yang:
-   - Jelas strukturnya.
-   - Mudah diintegrasikan dengan REST API Go.
-   - Mudah dikembangkan dan dipelihara ke depannya.
+5. Halaman profile (protected):
+   - Form profile detail
+   - Form preferences
+   - Form update password
+   - Saat ini masih client-side (belum sinkron backend)
 
-### Arah pengembangan
+6. Infrastruktur API:
+   - HTTP client reusable (`fetch` wrapper)
+   - Endpoint auth login
+   - Fallback mock login bila `VITE_API_BASE_URL` belum diisi
 
-Urutan pengembangan yang direncanakan:
+### Yang masih placeholder / belum lengkap
 
-1. **v0.1 – Landing Page (FE only)**
-   - Route `/` berisi landing page dengan beberapa section:
-     - Hero, Features, How It Works, Preview, Benefits, CTA, Footer.
-   - Semua masih statis, tanpa backend.
+1. Route `/app` masih halaman placeholder.
+2. Fitur inti domain belum implement penuh:
+   - CRUD resep
+   - Search by ingredients
+   - Shopping list generator dari resep terpilih
+   - Meal planner kalender dengan data persisten
+3. Integrasi backend masih minimal (baru auth login).
 
-2. **v0.2 – App Shell + Halaman Utama (Mock Data)**
-   - Route `/app` sebagai “shell” aplikasi:
-     - Navigasi internal ke: resep, shopping list, meal planner.
-   - UI dasar untuk:
-     - List resep + detail resep (pakai mock/dummy data).
-     - Halaman shopping list (dummy).
-     - Halaman meal planner (dummy).
-   - Belum perlu koneksi ke backend, fokus layout & UX.
+## 3. Route yang tersedia
 
-3. **v0.3 – Integrasi dengan Backend Go**
-   - Mengganti mock data dengan real data dari REST API.
-   - Implementasi API untuk:
-     - CRUD resep.
-     - Pencarian berdasarkan bahan.
-     - Generate shopping list.
-     - Meal plan (CRUD entry kalender).
+- `/` -> landing page
+- `/app` -> app shell placeholder
+- `/app/profile` -> profile (butuh auth)
+- `/auth/login` -> login
+- `/auth/register` -> register
+- `/auth/forgot-password` -> lupa password
+- `/auth/verify-email` -> verifikasi email
+- `*` -> 404 page
 
-4. **v0.4 – Auth & Multi User (opsional)**
-   - Login/register.
-   - Data per user (resep, shopping list, meal plan personal).
-
----
-
-## 3. Ruang Lingkup Frontend (Repo Ini)
-
-### Halaman / Route
-
-- `/` – **Landing Page**
-  - Menjelaskan apa itu Recipe Manager dan fitur utamanya.
-  - Mengajak user untuk masuk ke aplikasi utama.
-
-- `/app` – **Aplikasi Utama (Shell)**
-  - Nantinya berisi layout utama + nested routes / tab:
-    - `/app/recipes`
-    - `/app/shopping-lists`
-    - `/app/meal-planner`
-
-### Section Landing Page (Single Page)
-
-1. **Navbar**
-   - Logo / nama app (`Recipe Manager`).
-   - Menu anchor ke section lain: `Features`, `How it works`, `Preview`.
-   - Tombol `Open App` (link ke `/app`).
-
-2. **Hero Section**
-   - Headline: aplikasi untuk mengatur resep, belanja, dan meal plan.
-   - Subheadline singkat (deskripsi fungsi utama).
-   - Tombol: `Get Started / Open App` + `Lihat Fitur`.
-   - Area ilustrasi/mockup UI (bisa placeholder).
-
-3. **Feature Section**
-   - 4 fitur utama dalam bentuk card:
-     - Save Recipes
-     - Search by Ingredients
-     - Shopping List Generator
-     - Meal Planning Calendar
-
-4. **How It Works Section**
-   - 3 langkah sederhana:
-     1. Tambah & simpan resep.
-     2. Pilih bahan yang tersedia untuk cari resep.
-     3. Generate shopping list & susun meal plan.
-
-5. **Preview Section**
-   - Tampilan preview/mockup:
-     - List resep.
-     - Meal planner / shopping list.
-   - Teks penjelasan singkat.
-
-6. **Benefits Section**
-   - Manfaat nyata:
-     - Tidak bingung mau masak apa.
-     - Mengurangi bahan terbuang.
-     - Belanja lebih terarah.
-     - Cocok untuk meal prep / diet plan.
-
-7. **CTA Section**
-   - Ajakan singkat untuk mulai menggunakan app.
-   - Tombol `Open App`.
-
-8. **Footer**
-   - Nama project, nama developer, tahun, link GitHub.
-
----
-
-## 4. Kebutuhan Teknis Frontend
-
-### Tech Stack (rencana)
-
-- **Framework**: Vue 3 (Composition API)
-- **Build Tool**: Vite
-- **Routing**: Vue Router
-- **State Management**: Pinia (untuk state global saat sudah integrasi API)
-- **HTTP Client**: Axios / Fetch API
-- **Styling**:
-  - Bisa pakai Tailwind CSS atau CSS module biasa (menyesuaikan di implementasi).
-
-### Struktur Direktori (rencana)
+## 4. Struktur project ringkas
 
 ```text
 src/
-  main.ts
-  App.vue
-  router/
-    index.ts
-  store/
-    index.ts        # setup Pinia (nantinya)
-  pages/
-    LandingPage.vue
-    AppShell.vue    # container untuk route /app
-    RecipesPage.vue
-    RecipeDetailPage.vue
-    ShoppingListsPage.vue
-    MealPlannerPage.vue
-  components/
-    landing/
-      Navbar.vue
-      HeroSection.vue
-      FeatureSection.vue
-      HowItWorksSection.vue
-      PreviewSection.vue
-      BenefitsSection.vue
-      CTASection.vue
-      AppFooter.vue
-    recipes/
-      RecipeCard.vue
-      RecipeList.vue
-      RecipeForm.vue
-    shopping/
-      ShoppingListCard.vue
-      ShoppingListItem.vue
-    mealplanner/
-      MealCalendar.vue
-      MealEntryForm.vue
+  app/                 # bootstrap app, router, layouts, global styles
+  features/            # modul per domain (home, auth, profile, app, misc)
+  shared/              # komponen umum, composables, lib, services, types
+```
+
+## 5. Fokus pengembangan berikutnya (disarankan)
+
+1. Implement `Recipes` module (list, detail, create/edit/delete).
+2. Implement `Meal Planner` mingguan dengan persist data.
+3. Implement `Shopping List` dari resep terpilih.
+4. Tambah persist auth/session (mis. localStorage + refresh strategy).
+5. Integrasi penuh dengan backend Go REST API.
