@@ -49,6 +49,27 @@ const benefits = [
   'Keep shopping lists tidy and reusable.',
   'Great for meal prep and diet planning.',
 ]
+
+const recipePreviewItems = [
+  { name: 'Chicken Stir Fry', time: '25 min', tags: ['Quick', 'High Protein'] },
+  { name: 'Avocado Toast', time: '10 min', tags: ['Breakfast', 'Vegetarian'] },
+  { name: 'Salmon Bowl', time: '30 min', tags: ['Omega-3', 'Meal Prep'] },
+]
+
+const weeklyPlanPreview = [
+  { day: 'Mon', meal: 'Chicken Stir Fry' },
+  { day: 'Tue', meal: 'Pasta Primavera' },
+  { day: 'Wed', meal: 'Salmon Bowl' },
+  { day: 'Thu', meal: 'Veggie Curry' },
+  { day: 'Fri', meal: 'Homemade Pizza' },
+]
+
+const shoppingPreviewItems = [
+  { item: 'Chicken breast', qty: '500 g', checked: true },
+  { item: 'Bell pepper', qty: '2 pcs', checked: false },
+  { item: 'Broccoli', qty: '1 head', checked: false },
+  { item: 'Greek yogurt', qty: '1 cup', checked: true },
+]
 </script>
 
 <template>
@@ -79,26 +100,38 @@ const benefits = [
         class="absolute inset-0 bg-gradient-to-br from-recipe-peach-w78 via-white to-recipe-mint-w82"
       />
       <div class="relative space-y-4">
-        <p class="text-sm font-semibold text-recipe-ink">Preview mockup</p>
-        <div class="grid gap-3">
-          <div
-            class="h-12 rounded-xl border border-recipe-sand-b10 bg-white/70"
-          />
-          <div
-            class="h-40 rounded-xl border border-recipe-sand-b10 bg-white/70"
-          />
-          <div class="grid grid-cols-2 gap-3">
-            <div
-              class="h-20 rounded-xl border border-recipe-sand-b10 bg-white/70"
-            />
-            <div
-              class="h-20 rounded-xl border border-recipe-sand-b10 bg-white/70"
-            />
+        <div class="flex items-center justify-between">
+          <p class="text-sm font-semibold text-recipe-ink">This week snapshot</p>
+          <span class="rounded-full bg-white/80 px-2 py-1 text-[11px] font-medium text-slate-600">
+            3 recipes planned
+          </span>
+        </div>
+        <div class="rounded-xl border border-recipe-sand-b10 bg-white/80 p-3">
+          <div class="flex items-center justify-between text-xs text-slate-500">
+            <span>Next meal</span>
+            <span>Tonight • 19:00</span>
+          </div>
+          <p class="mt-1 text-sm font-semibold text-recipe-ink">Chicken Stir Fry + Rice</p>
+          <p class="text-xs text-slate-600">Prep 10m • Cook 15m</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="rounded-xl border border-recipe-sand-b10 bg-white/80 p-3">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-recipe-mint">
+              Shopping
+            </p>
+            <p class="mt-1 text-sm font-semibold text-recipe-ink">8 / 14 items</p>
+            <div class="mt-2 h-2 rounded-full bg-recipe-sand-w75">
+              <div class="h-full w-2/3 rounded-full bg-recipe-mint"></div>
+            </div>
+          </div>
+          <div class="rounded-xl border border-recipe-sand-b10 bg-white/80 p-3">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-recipe-orange">
+              Weekly plan
+            </p>
+            <p class="mt-1 text-sm font-semibold text-recipe-ink">5 days filled</p>
+            <p class="mt-2 text-xs text-slate-600">Mon to Fri scheduled</p>
           </div>
         </div>
-        <p class="text-xs text-slate-500">
-          Placeholder for now—replace with screenshots or illustrations later.
-        </p>
       </div>
     </div>
   </section>
@@ -170,17 +203,27 @@ const benefits = [
         class="rounded-2xl border border-recipe-sand-b10 bg-white p-6 shadow-sm"
       >
         <p class="text-sm font-semibold text-recipe-ink">Recipe List</p>
-        <p class="mt-1 text-sm text-slate-600">Saved recipes with quick search.</p>
+        <p class="mt-1 text-sm text-slate-600">Saved recipes with quick search and tags.</p>
         <div class="mt-5 space-y-3">
-          <div
-            class="h-10 rounded-xl border border-recipe-sand-b10 bg-recipe-sand-w75"
-          />
-          <div
-            class="h-24 rounded-xl border border-recipe-sand-b10 bg-recipe-sand-w75"
-          />
-          <div
-            class="h-24 rounded-xl border border-recipe-sand-b10 bg-recipe-sand-w75"
-          />
+          <article
+            v-for="recipe in recipePreviewItems"
+            :key="recipe.name"
+            class="rounded-xl border border-recipe-sand-b10 bg-recipe-sand-w75 p-3"
+          >
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-sm font-semibold text-recipe-ink">{{ recipe.name }}</p>
+              <span class="text-xs text-slate-500">{{ recipe.time }}</span>
+            </div>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <span
+                v-for="tag in recipe.tags"
+                :key="tag"
+                class="rounded-full border border-recipe-sand-b12 bg-gradient-to-r from-white to-recipe-peach-w85 px-2 py-1 text-[11px] font-medium text-slate-700 shadow-[0_8px_18px_-14px_rgba(15,23,42,0.45)] transition hover:border-recipe-orange-b10 hover:from-recipe-orange-w85 hover:to-white hover:text-recipe-ink"
+              >
+                {{ tag }}
+              </span>
+            </div>
+          </article>
         </div>
       </div>
 
@@ -192,12 +235,42 @@ const benefits = [
         </p>
         <p class="mt-1 text-sm text-slate-600">Plan meals and auto-generate shopping lists.</p>
         <div class="mt-5 grid gap-3 sm:grid-cols-2">
-          <div
-            class="h-44 rounded-xl border border-recipe-sand-b10 bg-recipe-mint-w88"
-          />
-          <div
-            class="h-44 rounded-xl border border-recipe-sand-b10 bg-recipe-mint-w88"
-          />
+          <div class="rounded-xl border border-recipe-sand-b10 bg-recipe-mint-w88 p-3">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-recipe-ink">
+              Weekly plan
+            </p>
+            <ul class="mt-2 space-y-2 text-xs text-slate-700">
+              <li
+                v-for="plan in weeklyPlanPreview"
+                :key="plan.day"
+                class="flex items-center justify-between rounded-lg bg-white/70 px-2 py-1.5"
+              >
+                <span class="font-semibold">{{ plan.day }}</span>
+                <span>{{ plan.meal }}</span>
+              </li>
+            </ul>
+          </div>
+          <div class="rounded-xl border border-recipe-sand-b10 bg-recipe-mint-w88 p-3">
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-recipe-ink">
+              Shopping list
+            </p>
+            <ul class="mt-2 space-y-2 text-xs text-slate-700">
+              <li
+                v-for="entry in shoppingPreviewItems"
+                :key="entry.item"
+                class="flex items-center justify-between rounded-lg bg-white/70 px-2 py-1.5"
+              >
+                <span class="flex items-center gap-2">
+                  <span
+                    class="h-2 w-2 rounded-full"
+                    :class="entry.checked ? 'bg-emerald-500' : 'bg-slate-300'"
+                  ></span>
+                  <span>{{ entry.item }}</span>
+                </span>
+                <span>{{ entry.qty }}</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
