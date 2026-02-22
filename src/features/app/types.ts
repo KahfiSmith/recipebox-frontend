@@ -55,4 +55,5 @@ export interface ShoppingPayload {
   id?: string
   name: string
   qty: string
+  sourceLabel?: string
 }
