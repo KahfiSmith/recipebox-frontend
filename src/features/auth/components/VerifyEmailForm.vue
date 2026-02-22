@@ -71,15 +71,19 @@ const handleResend = () => {
     />
 
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <RouterLink to="/auth/login" class="text-sm text-slate-600 transition hover:text-recipe-orange">
+      <RouterLink
+        to="/auth/login"
+        class="text-sm text-slate-600 transition hover:text-recipe-orange"
+      >
         Back to login
       </RouterLink>
-      <Button type="button" variant="ghost" size="sm" @click="handleResend">
-        Resend code
-      </Button>
+      <Button type="button" variant="ghost" size="sm" @click="handleResend"> Resend code </Button>
     </div>
 
-    <p v-if="error" class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+    <p
+      v-if="error"
+      class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+    >
       {{ error }}
     </p>
     <p
