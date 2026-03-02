@@ -61,12 +61,12 @@ const handleSubmit = () => {
   error.value = ''
 
   if (!isMinLength(form.name.trim(), 2)) {
-    error.value = 'Nama item minimal 2 karakter.'
+    error.value = 'Item name must be at least 2 characters.'
     return
   }
 
   if (!isMinLength(form.qty.trim(), 1)) {
-    error.value = 'Quantity wajib diisi.'
+    error.value = 'Quantity is required.'
     return
   }
 
@@ -74,7 +74,7 @@ const handleSubmit = () => {
     form.selectedMenu === '__new__' ? form.newMenuName.trim() : form.selectedMenu.trim()
 
   if (!isMinLength(sourceLabel, 2)) {
-    error.value = 'Pilih menu atau isi nama menu baru minimal 2 karakter.'
+    error.value = 'Choose a group or enter a new group name with at least 2 characters.'
     return
   }
 
@@ -115,7 +115,7 @@ const toggleGroup = (groupName: string) => {
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-recipe-orange">Shopping List</p>
       <h1 class="mt-2 text-2xl font-semibold text-recipe-ink">Smart shopping list</h1>
       <p class="mt-2 max-w-2xl text-sm text-slate-600">
-        Tambah item manual atau terima ingredient dari Meal Planner.
+        Add items manually or pull ingredients straight from your meal plan.
       </p>
       <div class="mt-4 flex flex-wrap gap-2 text-xs">
         <span class="rounded-full border border-recipe-sand-b10 bg-recipe-sand-w75 px-3 py-1">
@@ -139,13 +139,13 @@ const toggleGroup = (groupName: string) => {
             class="mt-2 w-full rounded-lg border border-recipe-sand bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-recipe-mint focus:ring-2 focus:ring-recipe-mint-w60 focus:ring-offset-1"
           >
             <option v-for="option in menuOptions" :key="option" :value="option">{{ option }}</option>
-            <option value="__new__">+ Buat menu baru</option>
+            <option value="__new__">+ Create new group</option>
           </select>
         </label>
         <Input
           v-if="form.selectedMenu === '__new__'"
           v-model="form.newMenuName"
-          label="Nama menu baru"
+          label="New group name"
           name="new-menu-name"
           placeholder="Pasta Primavera"
           required
@@ -239,7 +239,7 @@ const toggleGroup = (groupName: string) => {
         </article>
       </div>
 
-      <p v-else class="mt-4 text-sm text-slate-500">Belum ada item belanja.</p>
+      <p v-else class="mt-4 text-sm text-slate-500">No shopping items yet.</p>
     </section>
   </div>
 </template>

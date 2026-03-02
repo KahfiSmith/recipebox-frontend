@@ -37,17 +37,17 @@ const handleSubmit = () => {
   error.value = ''
 
   if (!isMinLength(form.name.trim(), 2)) {
-    error.value = 'Nama resep minimal 2 karakter.'
+    error.value = 'Recipe name must be at least 2 characters.'
     return
   }
 
   if (!isMinLength(form.category.trim(), 2)) {
-    error.value = 'Kategori minimal 2 karakter.'
+    error.value = 'Category must be at least 2 characters.'
     return
   }
 
   if (Number(form.prepTime) <= 0) {
-    error.value = 'Prep time harus lebih dari 0.'
+    error.value = 'Prep time must be greater than 0.'
     return
   }
 
@@ -87,9 +87,9 @@ const handleDelete = (id: string) => {
   <div class="min-w-0 space-y-6">
     <header class="rounded-2xl border border-recipe-sand-b10 bg-white p-6 shadow-sm">
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-recipe-orange">Recipes</p>
-      <h1 class="mt-2 text-2xl font-semibold text-recipe-ink">Recipe CRUD</h1>
+      <h1 class="mt-2 text-2xl font-semibold text-recipe-ink">Your recipes</h1>
       <p class="mt-2 max-w-2xl text-sm text-slate-600">
-        CRUD diletakkan di menu Recipes, bukan di Overview, supaya struktur fitur tetap bersih.
+        Save, update, and organize recipes so your go-to meals are always easy to find.
       </p>
     </header>
 
@@ -99,7 +99,7 @@ const handleDelete = (id: string) => {
       </h2>
 
       <form class="mt-4 grid gap-4 sm:grid-cols-3" @submit.prevent="handleSubmit">
-        <Input v-model="form.name" label="Recipe name" name="recipe-name" placeholder="Nasi goreng" required />
+        <Input v-model="form.name" label="Recipe name" name="recipe-name" placeholder="Fried rice" required />
         <Input v-model="form.category" label="Category" name="recipe-category" placeholder="Dinner" required />
         <Input
           v-model="form.prepTime"
@@ -149,7 +149,7 @@ const handleDelete = (id: string) => {
         </article>
       </div>
 
-      <p v-else class="text-sm text-slate-500">Belum ada resep. Tambahkan resep pertama kamu.</p>
+      <p v-else class="text-sm text-slate-500">No recipes yet. Add your first recipe.</p>
     </section>
   </div>
 </template>

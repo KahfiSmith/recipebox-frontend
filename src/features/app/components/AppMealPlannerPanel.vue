@@ -47,18 +47,18 @@ const handleSubmit = () => {
   error.value = ''
 
   if (!isMinLength(form.mealName.trim(), 2)) {
-    error.value = 'Nama menu minimal 2 karakter.'
+    error.value = 'Meal name must be at least 2 characters.'
     return
   }
 
   if (Number(form.servings) <= 0) {
-    error.value = 'Servings harus lebih dari 0.'
+    error.value = 'Servings must be greater than 0.'
     return
   }
 
   const ingredients = toIngredients(form.ingredientsText)
   if (!ingredients.length) {
-    error.value = 'Isi minimal satu bahan (pisahkan dengan koma).'
+    error.value = 'Add at least one ingredient (separate items with commas).'
     return
   }
 
@@ -96,7 +96,7 @@ const handleSendIngredients = (entry: MealPlanEntry) => {
       <p class="text-xs font-semibold uppercase tracking-[0.2em] text-recipe-orange">Meal Planner</p>
       <h1 class="mt-2 text-2xl font-semibold text-recipe-ink">Weekly planner</h1>
       <p class="mt-2 max-w-2xl text-sm text-slate-600">
-        Tambah menu per hari, tandai sudah dimasak, lalu kirim bahan ke Shopping List.
+        Plan meals for each day, mark what is cooked, and send ingredients to your shopping list.
       </p>
       <div class="mt-4 flex flex-wrap gap-2 text-xs">
         <span class="rounded-full border border-recipe-sand-b10 bg-recipe-sand-w75 px-3 py-1">
@@ -189,7 +189,7 @@ const handleSendIngredients = (entry: MealPlanEntry) => {
         </article>
       </div>
 
-      <p v-else class="mt-4 text-sm text-slate-500">Belum ada meal plan untuk minggu ini.</p>
+      <p v-else class="mt-4 text-sm text-slate-500">No meal plans yet for this week.</p>
     </section>
   </div>
 </template>
