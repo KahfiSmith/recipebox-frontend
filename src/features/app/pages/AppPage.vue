@@ -24,22 +24,22 @@ const primaryMenu: DashboardMenuItem[] = [
   {
     key: 'overview',
     label: 'Overview',
-    description: 'Dashboard ringkas',
+    description: 'See your activity at a glance',
   },
   {
     key: 'recipes',
     label: 'Recipes',
-    description: 'Kelola resep masakan',
+    description: 'Keep your favorite recipes in one place',
   },
   {
     key: 'meal-planner',
     label: 'Meal Planner',
-    description: 'Rencana menu mingguan',
+    description: 'Plan this week\'s meals',
   },
   {
     key: 'shopping-list',
     label: 'Shopping List',
-    description: 'Daftar belanja otomatis',
+    description: 'Track ingredients you need to buy',
   },
 ]
 
