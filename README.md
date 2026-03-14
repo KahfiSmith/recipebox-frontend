@@ -13,9 +13,11 @@ Frontend untuk aplikasi Recipebox berbasis Vue 3 + Vite + TypeScript dengan stru
 
 - Landing page `/` sudah lengkap: Hero, Features, How it works, Preview, Benefits, CTA, Footer.
 - Preview landing sudah berisi mockup realistis (recipe list, weekly plan, shopping list) berbasis data statis.
-- Auth flow sudah tersedia (UI + validasi dasar): login, register, forgot password, verify email.
+- Auth flow sudah terhubung ke layer service: login, register, forgot password, verify email, dan reset password.
+- Session auth mencoba dipulihkan lewat `/auth/refresh` lalu `/auth/me` saat `VITE_API_BASE_URL` tersedia.
+- Tersedia panel debug auth khusus mode development untuk mengecek email user, access token in-memory, dan uji manual `/auth/refresh` / `/auth/me`.
 - Route guard aktif untuk `requiresAuth` dan `guestOnly`.
-- Halaman `/app` masih placeholder untuk aplikasi utama.
+- Halaman `/app` berfungsi sebagai workspace lokal untuk overview, recipes, meal planner, dan shopping list.
 - Halaman `/app/profile` sudah tersedia (form profile, preferences, dan update password di sisi client).
 
 ## Prasyarat
@@ -41,7 +43,7 @@ cp .env.example .env
 
 - `VITE_API_BASE_URL` (contoh: `https://api.example.com`)
 
-Catatan: jika `VITE_API_BASE_URL` tidak di-set, login akan memakai mock response (untuk memudahkan development).
+Catatan: jika `VITE_API_BASE_URL` tidak di-set, login akan memakai mock session dan form auth lain akan memakai mock success response agar flow development tetap bisa diuji.
 
 ## Menjalankan
 
@@ -78,11 +80,11 @@ pnpm format     # prettier untuk src/
 │  │
 │  ├─ features/                    # modul per fitur/domain
 │  │  ├─ auth/
-│  │  │  ├─ components/LoginForm.vue
-│  │  │  ├─ pages/LoginPage.vue
+│  │  │  ├─ components/*Form.vue   # login/register/forgot/verify/reset
+│  │  │  ├─ pages/*Page.vue        # halaman auth
 │  │  │  ├─ services/authService.ts
 │  │  │  └─ stores/authStore.ts
-│  │  ├─ app/pages/AppPage.vue     # placeholder app shell
+│  │  ├─ app/pages/AppPage.vue     # workspace lokal overview/recipes/planner/shopping
 │  │  ├─ home/pages/HomePage.vue
 │  │  ├─ profile/pages/ProfilePage.vue
 │  │  └─ misc/pages/NotFoundPage.vue
@@ -114,7 +116,8 @@ pnpm format     # prettier untuk src/
 ## Catatan arsitektur singkat
 
 - Routing: rute didefinisikan di `src/app/router/routes.ts` dan guard di `src/app/router/guards.ts` (redirect login dan update `document.title`).
-- HTTP client: `src/shared/services/httpClient.ts` menggunakan `fetch` dan `VITE_API_BASE_URL`.
+- HTTP client: `src/shared/services/httpClient.ts` menggunakan `fetch`, `credentials: include`, dan bearer access token in-memory dari auth store.
+- Auth service: `src/features/auth/services/authService.ts` mengikuti endpoint auth di `docs/api.md` dengan fallback mock untuk development saat API base URL belum di-set.
 - Alias import: `@` mengarah ke `src/` (lihat `vite.config.ts`).
 
 ## Troubleshooting
