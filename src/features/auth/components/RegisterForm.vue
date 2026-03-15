@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { useMutation } from '@tanstack/vue-query'
+import { computed, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
+import { registerFormSchema } from '@/features/auth/lib/authSchemas'
+import { authService } from '@/features/auth/services/authService'
 import { Button, Input } from '@/shared/components/ui'
-import { isEmail, isMinLength } from '@/shared/lib/validators'
+import { getZodErrorMessage } from '@/shared/lib/validators'
 
 const form = reactive({
   name: '',
@@ -14,34 +17,36 @@ const form = reactive({
 
 const error = ref('')
 const success = ref('')
+const registerMutation = useMutation({
+  mutationFn: authService.register,
+})
+const isSubmitting = computed(() => registerMutation.isPending.value)
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   error.value = ''
   success.value = ''
 
-  if (!isMinLength(form.name.trim(), 2)) {
-    error.value = 'Name must be at least 2 characters'
+  const validation = registerFormSchema.safeParse(form)
+
+  if (!validation.success) {
+    error.value = getZodErrorMessage(validation.error, 'Registration failed')
     return
   }
 
-  if (!isEmail(form.email)) {
-    error.value = 'Invalid email address'
-    return
-  }
+  try {
+    const payload = {
+      name: validation.data.name,
+      email: validation.data.email,
+      password: validation.data.password,
+    }
+    const response = await registerMutation.mutateAsync(payload)
 
-  if (!isMinLength(form.password, 6)) {
-    error.value = 'Password must be at least 6 characters'
-    return
+    success.value = response.message
+    form.password = ''
+    form.confirmPassword = ''
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Registration failed'
   }
-
-  if (form.password !== form.confirmPassword) {
-    error.value = 'Passwords do not match'
-    return
-  }
-
-  success.value = 'Account created. You can now log in.'
-  form.password = ''
-  form.confirmPassword = ''
 }
 </script>
 
@@ -94,6 +99,8 @@ const handleSubmit = () => {
       {{ success }}
     </p>
 
-    <Button class="w-full">Create account</Button>
+    <Button class="w-full" :disabled="isSubmitting">
+      {{ isSubmitting ? 'Creating account...' : 'Create account' }}
+    </Button>
   </form>
 </template>

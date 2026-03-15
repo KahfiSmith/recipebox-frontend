@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { useMutation } from '@tanstack/vue-query'
+import { computed, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
+import { forgotPasswordPayloadSchema } from '@/features/auth/lib/authSchemas'
+import { authService } from '@/features/auth/services/authService'
 import { Button, Input } from '@/shared/components/ui'
-import { isEmail } from '@/shared/lib/validators'
+import { getZodErrorMessage } from '@/shared/lib/validators'
 
 const form = reactive({
   email: '',
@@ -11,17 +14,28 @@ const form = reactive({
 
 const error = ref('')
 const success = ref('')
+const forgotPasswordMutation = useMutation({
+  mutationFn: authService.forgotPassword,
+})
+const isSubmitting = computed(() => forgotPasswordMutation.isPending.value)
 
-const handleSubmit = () => {
+const handleSubmit = async () => {
   error.value = ''
   success.value = ''
 
-  if (!isEmail(form.email)) {
-    error.value = 'Invalid email address'
+  const validation = forgotPasswordPayloadSchema.safeParse(form)
+
+  if (!validation.success) {
+    error.value = getZodErrorMessage(validation.error, 'Failed to send reset link')
     return
   }
 
-  success.value = 'If an account exists for this email, we sent a reset link.'
+  try {
+    const response = await forgotPasswordMutation.mutateAsync(validation.data)
+    success.value = response.message
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to send reset link'
+  }
 }
 </script>
 
@@ -51,6 +65,12 @@ const handleSubmit = () => {
       >
         Verify email
       </RouterLink>
+      <RouterLink
+        to="/auth/reset-password"
+        class="text-slate-600 transition hover:text-recipe-orange"
+      >
+        Reset with token
+      </RouterLink>
     </div>
 
     <p v-if="error" class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -63,6 +83,8 @@ const handleSubmit = () => {
       {{ success }}
     </p>
 
-    <Button class="w-full">Send reset link</Button>
+    <Button class="w-full" :disabled="isSubmitting">
+      {{ isSubmitting ? 'Sending link...' : 'Send reset link' }}
+    </Button>
   </form>
 </template>
