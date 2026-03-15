@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { useMutation } from '@tanstack/vue-query'
+import { computed, reactive, ref } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 
+import {
+  verifyEmailConfirmPayloadSchema,
+  verifyEmailRequestPayloadSchema,
+} from '@/features/auth/lib/authSchemas'
+import { authService } from '@/features/auth/services/authService'
 import { Button, Input } from '@/shared/components/ui'
-import { isEmail, isMinLength } from '@/shared/lib/validators'
+import { getZodErrorMessage } from '@/shared/lib/validators'
 
 const form = reactive({
   email: '',
@@ -13,35 +19,68 @@ const form = reactive({
 const error = ref('')
 const success = ref('')
 const info = ref('')
+const route = useRoute()
+const router = useRouter()
+const verifyEmailMutation = useMutation({
+  mutationFn: authService.confirmEmailVerification,
+})
+const resendVerificationMutation = useMutation({
+  mutationFn: authService.requestEmailVerification,
+})
+const isVerifying = computed(() => verifyEmailMutation.isPending.value)
+const isResending = computed(() => resendVerificationMutation.isPending.value)
 
-const handleSubmit = () => {
+const emailQuery = route.query.email
+
+if (typeof emailQuery === 'string') {
+  form.email = emailQuery
+}
+
+const handleSubmit = async () => {
   error.value = ''
   success.value = ''
   info.value = ''
 
-  if (!isEmail(form.email)) {
-    error.value = 'Invalid email address'
+  const validation = verifyEmailConfirmPayloadSchema.safeParse(form)
+
+  if (!validation.success) {
+    error.value = getZodErrorMessage(validation.error, 'Email verification failed')
     return
   }
 
-  if (!isMinLength(form.code.trim(), 6)) {
-    error.value = 'Verification code must be at least 6 characters'
-    return
-  }
+  try {
+    const response = await verifyEmailMutation.mutateAsync(validation.data)
 
-  success.value = 'Email verified. You can now log in.'
+    success.value = response.message
+    window.setTimeout(() => {
+      router.push({
+        name: 'login',
+        query: { email: form.email.trim() },
+      })
+    }, 900)
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Email verification failed'
+  }
 }
 
-const handleResend = () => {
+const handleResend = async () => {
   error.value = ''
   success.value = ''
+  info.value = ''
 
-  if (!isEmail(form.email)) {
-    error.value = 'Enter a valid email to resend the code'
+  const validation = verifyEmailRequestPayloadSchema.safeParse({ email: form.email })
+
+  if (!validation.success) {
+    error.value = getZodErrorMessage(validation.error, 'Failed to resend verification code')
     return
   }
 
-  info.value = 'If the email exists, we sent a new verification code.'
+  try {
+    const response = await resendVerificationMutation.mutateAsync(validation.data)
+    info.value = response.message
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to resend verification code'
+  }
 }
 </script>
 
@@ -77,7 +116,9 @@ const handleResend = () => {
       >
         Back to login
       </RouterLink>
-      <Button type="button" variant="ghost" size="sm" @click="handleResend"> Resend code </Button>
+      <Button type="button" variant="ghost" size="sm" :disabled="isResending" @click="handleResend">
+        {{ isResending ? 'Resending...' : 'Resend code' }}
+      </Button>
     </div>
 
     <p
@@ -99,6 +140,8 @@ const handleResend = () => {
       {{ success }}
     </p>
 
-    <Button class="w-full">Verify email</Button>
+    <Button class="w-full" :disabled="isVerifying">
+      {{ isVerifying ? 'Verifying...' : 'Verify email' }}
+    </Button>
   </form>
 </template>
