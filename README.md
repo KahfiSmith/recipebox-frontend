@@ -4,8 +4,9 @@ Frontend untuk aplikasi Recipebox berbasis Vue 3 + Vite + TypeScript dengan stru
 
 ## Tech stack
 
-- Vue 3, Vue Router, Pinia
+- Vue 3, Vue Router, Pinia, TanStack Query
 - Vite, TypeScript
+- Zod untuk validasi payload/form dan runtime parsing response auth
 - Tailwind CSS (via `@tailwindcss/vite`) + konfigurasi `components.json` (shadcn-vue)
 - ESLint + Prettier
 
@@ -14,8 +15,9 @@ Frontend untuk aplikasi Recipebox berbasis Vue 3 + Vite + TypeScript dengan stru
 - Landing page `/` sudah lengkap: Hero, Features, How it works, Preview, Benefits, CTA, Footer.
 - Preview landing sudah berisi mockup realistis (recipe list, weekly plan, shopping list) berbasis data statis.
 - Auth flow sudah terhubung ke layer service: login, register, forgot password, verify email, dan reset password.
+- Form auth memakai TanStack Query mutation untuk request lifecycle, sementara auth state tetap di Pinia.
 - Session auth mencoba dipulihkan lewat `/auth/refresh` lalu `/auth/me` saat `VITE_API_BASE_URL` tersedia.
-- Tersedia panel debug auth khusus mode development untuk mengecek email user, access token in-memory, dan uji manual `/auth/refresh` / `/auth/me`.
+- Tersedia panel debug auth khusus mode development untuk mengecek koneksi API lewat `/healthz`, email user, access token in-memory, dan uji manual `/auth/refresh` / `/auth/me`.
 - Route guard aktif untuk `requiresAuth` dan `guestOnly`.
 - Halaman `/app` berfungsi sebagai workspace lokal untuk overview, recipes, meal planner, dan shopping list.
 - Halaman `/app/profile` sudah tersedia (form profile, preferences, dan update password di sisi client).
@@ -41,7 +43,12 @@ cp .env.example .env
 
 2. Set variabel berikut:
 
-- `VITE_API_BASE_URL` (contoh: `https://api.example.com`)
+- `VITE_API_BASE_URL` (contoh local backend: `http://localhost:8080`)
+
+Catatan penting:
+- Isi `VITE_API_BASE_URL` dengan base host API saja, jangan full endpoint auth.
+- Frontend sudah otomatis menambahkan path seperti `/api/v1/auth/login` dan `/api/v1/auth/register`.
+- Dengan backend default lokal, request akan menjadi `http://localhost:8080/api/v1/auth/login`, `http://localhost:8080/api/v1/auth/register`, dan seterusnya.
 
 Catatan: jika `VITE_API_BASE_URL` tidak di-set, login akan memakai mock session dan form auth lain akan memakai mock success response agar flow development tetap bisa diuji.
 
@@ -96,7 +103,7 @@ pnpm format     # prettier untuk src/
 │     │     ├─ Button.vue
 │     │     ├─ Input.vue
 │     │     └─ index.ts
-│     ├─ composables/              # hooks reusable (mis. auth, async task)
+│     ├─ composables/              # hooks reusable (mis. auth)
 │     ├─ constants/
 │     ├─ lib/                      # helper (utils, validators)
 │     ├─ services/
@@ -117,7 +124,8 @@ pnpm format     # prettier untuk src/
 
 - Routing: rute didefinisikan di `src/app/router/routes.ts` dan guard di `src/app/router/guards.ts` (redirect login dan update `document.title`).
 - HTTP client: `src/shared/services/httpClient.ts` menggunakan `fetch`, `credentials: include`, dan bearer access token in-memory dari auth store.
-- Auth service: `src/features/auth/services/authService.ts` mengikuti endpoint auth di `docs/api.md` dengan fallback mock untuk development saat API base URL belum di-set.
+- Server-state UI: TanStack Query di-bootstrap dari `src/app/queryClient.ts` dan dipakai untuk mutation auth/debug yang memanggil backend.
+- Auth service: `src/features/auth/services/authService.ts` mengikuti endpoint auth di `docs/api.md`, memvalidasi payload/response auth dengan Zod, dan punya fallback mock untuk development saat API base URL belum di-set.
 - Alias import: `@` mengarah ke `src/` (lihat `vite.config.ts`).
 
 ## Troubleshooting

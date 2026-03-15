@@ -17,7 +17,9 @@ Fokus saat ini:
 - Framework: Vue 3 (`<script setup lang="ts">`)
 - Router: Vue Router 4
 - State: Pinia
+- Server-state / async mutations: TanStack Query
 - Styling: Tailwind CSS v4
+- Runtime validation: Zod
 - UI config: `components.json` (shadcn-vue aliases + styling baseline)
 - Build tool: Vite
 - Lint/Format: ESLint + Prettier
@@ -44,7 +46,9 @@ Aturan penempatan:
 - Pakai TypeScript secara eksplisit untuk payload/response API.
 - Reuse komponen UI dari `src/shared/components/ui` sebelum membuat komponen baru.
 - Validasi form sederhana gunakan helper di `src/shared/lib/validators.ts`.
+- Untuk validasi form kompleks atau parsing payload/response API, gunakan schema Zod di boundary form/service alih-alih pengecekan manual yang tersebar.
 - Untuk pola request HTTP baru, ikuti wrapper yang ada di `src/shared/services/httpClient.ts` sebelum memperkenalkan abstraction lain.
+- Untuk state request async ke backend, gunakan TanStack Query; auth identity/session tetap sumber kebenaran di Pinia kecuali ada tugas eksplisit yang mengubahnya.
 - Untuk route baru:
   - Definisikan di `src/app/router/routes.ts`
   - Atur `meta.title` untuk update `document.title`
@@ -57,10 +61,12 @@ Aturan penempatan:
 - State auth sumber kebenaran ada di `src/features/auth/stores/authStore.ts`.
 - Akses auth di komponen melalui composable `useAuth()` (`src/shared/composables/useAuth.ts`).
 - Semua request jaringan gunakan `apiClient` (`src/shared/services/httpClient.ts`).
+- Query/mutation untuk request backend gunakan TanStack Query di level komponen/composable; jangan memindahkan source of truth session auth dari Pinia tanpa tugas eksplisit.
 - Endpoint API didefinisikan terpusat di `src/shared/services/api/index.ts`.
 - Flow auth frontend saat ini sudah mencakup `register`, `login`, `verify-email/request`, `verify-email/confirm`, `password/forgot`, `password/reset`, `refresh`, `logout`, dan `me` pada layer service.
 - Saat `VITE_API_BASE_URL` kosong, flow auth development tetap harus usable lewat mock response yang aman untuk login dan mock success message untuk form auth lain.
 - Store auth saat ini menyimpan access token di memori Pinia dan mencoba restore session via `/auth/refresh` + `/auth/me` ketika API tersedia; jangan menambah persistence tambahan tanpa tugas yang eksplisit.
+- Untuk auth payload/response yang datang dari atau dikirim ke backend, validasi di boundary service dengan Zod sebelum data dipakai lebih jauh.
 - Saat mengimplementasikan auth flow baru, gunakan `docs/api.md` sebagai target kontrak backend, tetapi bedakan dengan jelas antara contract target dan status implementasi frontend saat ini.
 - Untuk endpoint list (`recipes`, `meal-plans`, `shopping-items`), ikuti contract pagination yang terdokumentasi di `docs/api.md`.
 
