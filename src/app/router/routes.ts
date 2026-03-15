@@ -54,6 +54,12 @@ const baseRoutes: RouteRecordRaw[] = [
         meta: { title: 'Forgot Password', guestOnly: true },
       },
       {
+        path: 'reset-password',
+        name: 'reset-password',
+        component: () => import('@/features/auth/pages/ResetPasswordPage.vue'),
+        meta: { title: 'Reset Password', guestOnly: true },
+      },
+      {
         path: 'verify-email',
         name: 'verify-email',
         component: () => import('@/features/auth/pages/VerifyEmailPage.vue'),

@@ -3,8 +3,9 @@ import type { Router } from 'vue-router'
 import { useAuthStore } from '@/features/auth/stores/authStore'
 
 export function setupRouterGuards(router: Router) {
-  router.beforeEach((to) => {
+  router.beforeEach(async (to) => {
     const authStore = useAuthStore()
+    await authStore.initializeSession()
     const requiresAuth = Boolean(to.meta?.requiresAuth)
     const guestOnly = Boolean(to.meta?.guestOnly)
 
@@ -16,7 +17,7 @@ export function setupRouterGuards(router: Router) {
     }
 
     if (guestOnly && authStore.isAuthenticated) {
-      return { name: 'home' }
+      return { name: 'app' }
     }
   })
 
