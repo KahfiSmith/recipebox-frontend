@@ -17,9 +17,8 @@ Frontend untuk aplikasi Recipebox berbasis Vue 3 + Vite + TypeScript dengan stru
 - Auth flow sudah terhubung ke layer service: login, register, forgot password, verify email, dan reset password.
 - Form auth memakai TanStack Query mutation untuk request lifecycle, sementara auth state tetap di Pinia.
 - Session auth mencoba dipulihkan lewat `/auth/refresh` lalu `/auth/me` saat `VITE_API_BASE_URL` tersedia.
-- Tersedia panel debug auth khusus mode development untuk mengecek koneksi API lewat `/healthz`, email user, access token in-memory, dan uji manual `/auth/refresh` / `/auth/me`.
 - Route guard aktif untuk `requiresAuth` dan `guestOnly`.
-- Halaman `/app` berfungsi sebagai workspace lokal untuk overview, recipes, meal planner, dan shopping list.
+- Halaman `/app` berfungsi sebagai workspace lokal untuk recipes, meal planner, dan shopping list; overview akan membaca summary dari `GET /dashboard` saat `VITE_API_BASE_URL` tersedia.
 - Halaman `/app/profile` sudah tersedia (form profile, preferences, dan update password di sisi client).
 
 ## Prasyarat
@@ -91,7 +90,7 @@ pnpm format     # prettier untuk src/
 │  │  │  ├─ pages/*Page.vue        # halaman auth
 │  │  │  ├─ services/authService.ts
 │  │  │  └─ stores/authStore.ts
-│  │  ├─ app/pages/AppPage.vue     # workspace lokal overview/recipes/planner/shopping
+│  │  ├─ app/pages/AppPage.vue     # workspace lokal + summary overview dari API dashboard saat tersedia
 │  │  ├─ home/pages/HomePage.vue
 │  │  ├─ profile/pages/ProfilePage.vue
 │  │  └─ misc/pages/NotFoundPage.vue
@@ -126,6 +125,7 @@ pnpm format     # prettier untuk src/
 - HTTP client: `src/shared/services/httpClient.ts` menggunakan `fetch`, `credentials: include`, dan bearer access token in-memory dari auth store.
 - Server-state UI: TanStack Query di-bootstrap dari `src/app/queryClient.ts` dan dipakai untuk mutation auth/debug yang memanggil backend.
 - Auth service: `src/features/auth/services/authService.ts` mengikuti endpoint auth di `docs/api.md`, memvalidasi payload/response auth dengan Zod, dan punya fallback mock untuk development saat API base URL belum di-set.
+- Dashboard service: `src/features/app/services/dashboardService.ts` memanggil `GET /api/v1/dashboard` dan memvalidasi shape response summary dengan Zod sebelum dipakai di overview.
 - Alias import: `@` mengarah ke `src/` (lihat `vite.config.ts`).
 
 ## Troubleshooting
