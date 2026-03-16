@@ -6,7 +6,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import {
   verifyEmailConfirmPayloadSchema,
   verifyEmailRequestPayloadSchema,
-} from '@/features/auth/lib/authSchemas'
+} from '@/shared/schemas/authSchemas'
 import { authService } from '@/features/auth/services/authService'
 import { Button, Input } from '@/shared/components/ui'
 import { getZodErrorMessage } from '@/shared/lib/validators'

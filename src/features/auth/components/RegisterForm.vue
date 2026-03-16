@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/vue-query'
 import { computed, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
-import { registerFormSchema } from '@/features/auth/lib/authSchemas'
+import { registerFormSchema } from '@/shared/schemas/authSchemas'
 import { authService } from '@/features/auth/services/authService'
 import { Button, Input } from '@/shared/components/ui'
 import { getZodErrorMessage } from '@/shared/lib/validators'
