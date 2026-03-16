@@ -97,7 +97,7 @@ const shoppingPreviewItems = [
       class="relative overflow-hidden rounded-2xl border border-recipe-sand-b10 bg-white p-6 shadow-sm"
     >
       <div
-        class="absolute inset-0 bg-gradient-to-br from-recipe-peach-w78 via-white to-recipe-mint-w82"
+        class="absolute inset-0 bg-linear-to-br from-recipe-peach-w78 via-white to-recipe-mint-w82"
       />
       <div class="relative space-y-4">
         <div class="flex items-center justify-between">
@@ -218,7 +218,7 @@ const shoppingPreviewItems = [
               <span
                 v-for="tag in recipe.tags"
                 :key="tag"
-                class="rounded-full border border-recipe-sand-b12 bg-gradient-to-r from-white to-recipe-peach-w85 px-2 py-1 text-[11px] font-medium text-slate-700 shadow-[0_8px_18px_-14px_rgba(15,23,42,0.45)] transition hover:border-recipe-orange-b10 hover:from-recipe-orange-w85 hover:to-white hover:text-recipe-ink"
+                class="rounded-full border border-recipe-sand-b12 bg-linear-to-r from-white to-recipe-peach-w85 px-2 py-1 text-[11px] font-medium text-slate-700 shadow-[0_8px_18px_-14px_rgba(15,23,42,0.45)] transition hover:border-recipe-orange-b10 hover:from-recipe-orange-w85 hover:to-white hover:text-recipe-ink"
               >
                 {{ tag }}
               </span>
@@ -282,7 +282,7 @@ const shoppingPreviewItems = [
       <p class="mt-2 text-sm text-slate-600">Small wins that make cooking feel easier.</p>
     </header>
 
-    <ul class="mt-6 grid gap-4 lg:grid-cols-2">
+    <ul class="mt-6 grid gap-6 lg:grid-cols-2">
       <li
         v-for="benefit in benefits"
         :key="benefit"
@@ -297,7 +297,7 @@ const shoppingPreviewItems = [
     class="mt-14 overflow-hidden rounded-2xl border border-recipe-sand-b10 bg-white shadow-sm"
   >
     <div
-      class="bg-gradient-to-r from-recipe-orange to-recipe-mint px-6 py-10 text-white sm:px-10"
+      class="bg-linear-to-r from-recipe-orange to-recipe-mint px-6 py-10 text-white sm:px-10"
     >
       <h2 class="text-2xl font-semibold">Ready to start?</h2>
       <p class="mt-2 max-w-2xl text-sm text-white/90">

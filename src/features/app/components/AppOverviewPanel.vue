@@ -7,6 +7,7 @@ defineProps<{
   recipeCount: number
   plannedMealsCount: number
   shoppingItemsCount: number
+  statusMessage?: string
 }>()
 </script>
 
@@ -22,6 +23,12 @@ defineProps<{
         <Button :as="RouterLink" to="/app/profile" variant="secondary">Open Profile</Button>
         <Button :as="RouterLink" to="/" variant="ghost">Back to Landing</Button>
       </div>
+      <p
+        v-if="statusMessage"
+        class="mt-4 rounded-lg border border-recipe-sand-b10 bg-recipe-sand-w75 px-3 py-2 text-sm text-slate-600"
+      >
+        {{ statusMessage }}
+      </p>
     </header>
 
     <div class="grid gap-4 sm:grid-cols-3">

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useQuery } from '@tanstack/vue-query'
 import { computed, ref } from 'vue'
 
 import AppMealPlannerPanel from '@/features/app/components/AppMealPlannerPanel.vue'
@@ -6,6 +7,7 @@ import AppOverviewPanel from '@/features/app/components/AppOverviewPanel.vue'
 import AppRecipesPanel from '@/features/app/components/AppRecipesPanel.vue'
 import AppShoppingListPanel from '@/features/app/components/AppShoppingListPanel.vue'
 import AppSidebar from '@/features/app/components/AppSidebar.vue'
+import { dashboardService } from '@/features/app/services/dashboardService'
 import type {
   AddIngredientsPayload,
   DashboardMenuItem,
@@ -18,6 +20,7 @@ import type {
   ShoppingPayload,
 } from '@/features/app/types'
 
+const hasApiBaseUrl = Boolean(import.meta.env.VITE_API_BASE_URL)
 const activeMenu = ref<DashboardMenuKey>('overview')
 
 const primaryMenu: DashboardMenuItem[] = [
@@ -184,6 +187,35 @@ const shoppingMenuOptions = computed(() => {
 
   return Array.from(options)
 })
+
+const dashboardQuery = useQuery({
+  queryKey: ['dashboard-overview'],
+  queryFn: dashboardService.getDashboard,
+  enabled: hasApiBaseUrl,
+})
+
+const overviewStatusMessage = computed(() => {
+  if (!hasApiBaseUrl) {
+    return 'Workspace masih memakai data lokal karena VITE_API_BASE_URL belum di-set.'
+  }
+
+  if (dashboardQuery.isPending.value) {
+    return 'Loading dashboard summary from API...'
+  }
+
+  if (dashboardQuery.error.value instanceof Error) {
+    return dashboardQuery.error.value.message
+  }
+
+  return 'Dashboard summary loaded from API.'
+})
+
+const overviewRecipeCount = computed(() =>
+  dashboardQuery.data.value?.summary.recipeCount ?? recipes.value.length)
+const overviewMealPlanCount = computed(() =>
+  dashboardQuery.data.value?.summary.upcomingMealPlanCount ?? mealPlanEntries.value.length)
+const overviewShoppingItemCount = computed(() =>
+  dashboardQuery.data.value?.summary.pendingShoppingItemCount ?? shoppingItems.value.length)
 </script>
 
 <template>
@@ -192,9 +224,10 @@ const shoppingMenuOptions = computed(() => {
 
     <AppOverviewPanel
       v-if="activeMenu === 'overview'"
-      :recipe-count="recipes.length"
-      :planned-meals-count="mealPlanEntries.length"
-      :shopping-items-count="shoppingItems.length"
+      :recipe-count="overviewRecipeCount"
+      :planned-meals-count="overviewMealPlanCount"
+      :shopping-items-count="overviewShoppingItemCount"
+      :status-message="overviewStatusMessage"
     />
     <AppRecipesPanel
       v-else-if="activeMenu === 'recipes'"
