@@ -6,6 +6,19 @@ export interface DashboardMenuItem {
   description: string
 }
 
+export interface DashboardSummary {
+  recipeCount: number
+  upcomingMealPlanCount: number
+  pendingShoppingItemCount: number
+}
+
+export interface DashboardOverviewResponse {
+  summary: DashboardSummary
+  recipes: unknown[]
+  mealPlans: unknown[]
+  shoppingItems: unknown[]
+}
+
 export interface RecipeItem {
   id: string
   name: string

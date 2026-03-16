@@ -4,6 +4,15 @@ export interface User {
   email: string
 }
 
+export interface RawApiUser {
+  id: number
+  name: string
+  email: string
+  emailVerifiedAt?: string | null
+  createdAt?: string
+  updatedAt?: string
+}
+
 export interface LoginPayload {
   email: string
   password: string
@@ -43,21 +52,25 @@ export interface AuthResponse {
 }
 
 export interface RawAuthResponse {
-  token?: string
-  accessToken?: string
-  user?: User
-  message?: string
-  data?: {
-    token?: string
-    accessToken?: string
-    user?: User
-  } | User
+  data: {
+    user: RawApiUser
+    tokens: {
+      accessToken: string
+      accessTokenExpiresAt?: string
+      refreshToken?: string
+      refreshTokenExpiresAt?: string
+    }
+  }
 }
 
 export interface RawUserResponse {
-  user?: User
-  message?: string
-  data?: {
-    user?: User
-  } | User
+  data: {
+    user: RawApiUser
+  }
+}
+
+export interface RawRegisterResponse {
+  data: {
+    user: RawApiUser
+  }
 }
