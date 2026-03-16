@@ -1,14 +1,16 @@
 import {
-  parseAuthResponse,
-  parseCurrentUserResponse,
-  parseForgotPasswordPayload,
-  parseLoginPayload,
-  parseMessageResponse,
-  parseRegisterPayload,
-  parseResetPasswordPayload,
-  parseVerifyEmailConfirmPayload,
-  parseVerifyEmailRequestPayload,
-} from '@/features/auth/lib/authSchemas'
+  apiMessageResponseSchema,
+  authResponseSchema,
+  currentUserResponseSchema,
+  forgotPasswordPayloadSchema,
+  loginPayloadSchema,
+  registerPayloadSchema,
+  registerResponseSchema,
+  resetPasswordPayloadSchema,
+  verifyEmailConfirmPayloadSchema,
+  verifyEmailRequestPayloadSchema,
+} from '@/shared/schemas/authSchemas'
+import { getZodErrorMessage } from '@/shared/lib/validators'
 import { apiClient } from '@/shared/services/httpClient'
 import { apiEndpoints } from '@/shared/services/api'
 import type {
@@ -17,6 +19,7 @@ import type {
   ForgotPasswordPayload,
   LoginPayload,
   RawAuthResponse,
+  RawRegisterResponse,
   RawUserResponse,
   RegisterPayload,
   ResetPasswordPayload,
@@ -24,6 +27,7 @@ import type {
   VerifyEmailConfirmPayload,
   VerifyEmailRequestPayload,
 } from '@/shared/types/api.types'
+import { z } from 'zod'
 
 const MOCK_USER: User = {
   id: '1',
@@ -37,10 +41,32 @@ const MOCK_RESPONSE: AuthResponse = {
 }
 
 const hasApiBaseUrl = Boolean(import.meta.env.VITE_API_BASE_URL)
+const registerSuccessMessage =
+  'Account created. Check your inbox to verify your email before logging in.'
+
+const parseWithSchema = <T>(schema: z.ZodSchema<T>, value: unknown, fallback: string): T => {
+  const result = schema.safeParse(value)
+
+  if (!result.success) {
+    throw new Error(getZodErrorMessage(result.error, fallback))
+  }
+
+  return result.data
+}
+
+const parseApiMessage = (value: unknown, fallback: string): ApiMessageResponse => {
+  const result = apiMessageResponseSchema.safeParse(value)
+
+  if (result.success) {
+    return result.data
+  }
+
+  return { message: fallback }
+}
 
 export const authService = {
   async login(payload: LoginPayload): Promise<AuthResponse> {
-    const validatedPayload = parseLoginPayload(payload)
+    const validatedPayload = parseWithSchema(loginPayloadSchema, payload, 'Invalid login payload')
 
     if (!hasApiBaseUrl) {
       return Promise.resolve({
@@ -56,32 +82,43 @@ export const authService = {
       apiEndpoints.auth.login,
       validatedPayload,
     )
-    return parseAuthResponse(response)
+    const parsed = parseWithSchema(authResponseSchema, response, 'Invalid auth response from API')
+
+    return {
+      accessToken: parsed.data.tokens.accessToken,
+      user: parsed.data.user,
+    }
   },
 
   async register(payload: RegisterPayload): Promise<ApiMessageResponse> {
-    const validatedPayload = parseRegisterPayload(payload)
+    const validatedPayload = parseWithSchema(
+      registerPayloadSchema,
+      payload,
+      'Invalid registration payload',
+    )
 
     if (!hasApiBaseUrl) {
       return Promise.resolve({
-        message: 'Account created. Check your inbox to verify your email before logging in.',
+        message: registerSuccessMessage,
       })
     }
 
-    const response = await apiClient.post<unknown, RegisterPayload>(
+    const response = await apiClient.post<RawRegisterResponse, RegisterPayload>(
       apiEndpoints.auth.register,
       validatedPayload,
     )
-    return parseMessageResponse(
-      response,
-      'Account created. Check your inbox to verify your email before logging in.',
-    )
+    parseWithSchema(registerResponseSchema, response, 'Invalid registration response from API')
+    return { message: registerSuccessMessage }
   },
 
   async requestEmailVerification(
     payload: VerifyEmailRequestPayload,
   ): Promise<ApiMessageResponse> {
-    const validatedPayload = parseVerifyEmailRequestPayload(payload)
+    const validatedPayload = parseWithSchema(
+      verifyEmailRequestPayloadSchema,
+      payload,
+      'Invalid email verification payload',
+    )
 
     if (!hasApiBaseUrl) {
       return Promise.resolve({
@@ -94,13 +131,17 @@ export const authService = {
       validatedPayload,
     )
 
-    return parseMessageResponse(response, 'If the email exists, a new verification code has been sent.')
+    return parseApiMessage(response, 'If the email exists, a new verification code has been sent.')
   },
 
   async confirmEmailVerification(
     payload: VerifyEmailConfirmPayload,
   ): Promise<ApiMessageResponse> {
-    const validatedPayload = parseVerifyEmailConfirmPayload(payload)
+    const validatedPayload = parseWithSchema(
+      verifyEmailConfirmPayloadSchema,
+      payload,
+      'Invalid email verification payload',
+    )
 
     if (!hasApiBaseUrl) {
       return Promise.resolve({
@@ -113,11 +154,15 @@ export const authService = {
       validatedPayload,
     )
 
-    return parseMessageResponse(response, 'Email verified. You can now log in.')
+    return parseApiMessage(response, 'Email verified. You can now log in.')
   },
 
   async forgotPassword(payload: ForgotPasswordPayload): Promise<ApiMessageResponse> {
-    const validatedPayload = parseForgotPasswordPayload(payload)
+    const validatedPayload = parseWithSchema(
+      forgotPasswordPayloadSchema,
+      payload,
+      'Invalid forgot password payload',
+    )
 
     if (!hasApiBaseUrl) {
       return Promise.resolve({
@@ -130,11 +175,15 @@ export const authService = {
       validatedPayload,
     )
 
-    return parseMessageResponse(response, 'If an account exists for this email, we sent a reset link.')
+    return parseApiMessage(response, 'If an account exists for this email, we sent a reset link.')
   },
 
   async resetPassword(payload: ResetPasswordPayload): Promise<ApiMessageResponse> {
-    const validatedPayload = parseResetPasswordPayload(payload)
+    const validatedPayload = parseWithSchema(
+      resetPasswordPayloadSchema,
+      payload,
+      'Invalid reset password payload',
+    )
 
     if (!hasApiBaseUrl) {
       return Promise.resolve({
@@ -147,7 +196,7 @@ export const authService = {
       validatedPayload,
     )
 
-    return parseMessageResponse(response, 'Password updated. You can now log in with your new password.')
+    return parseApiMessage(response, 'Password updated. You can now log in with your new password.')
   },
 
   async refresh(): Promise<AuthResponse> {
@@ -159,12 +208,19 @@ export const authService = {
         skipUnauthorizedHandler: true,
       },
     )
-    return parseAuthResponse(response)
+    const parsed = parseWithSchema(authResponseSchema, response, 'Invalid auth response from API')
+
+    return {
+      accessToken: parsed.data.tokens.accessToken,
+      user: parsed.data.user,
+    }
   },
 
   async getCurrentUser(): Promise<User> {
     const response = await apiClient.get<RawUserResponse>(apiEndpoints.auth.me)
-    return parseCurrentUserResponse(response)
+    const parsed = parseWithSchema(currentUserResponseSchema, response, 'Invalid user response from API')
+
+    return parsed.data.user
   },
 
   async logout(): Promise<void> {
