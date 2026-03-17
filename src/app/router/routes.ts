@@ -15,7 +15,7 @@ const baseRoutes: RouteRecordRaw[] = [
   },
   {
     path: '/app',
-    component: () => import('@/app/layouts/DefaultLayout.vue'),
+    component: () => import('@/app/layouts/AppLayout.vue'),
     children: [
       {
         path: '',

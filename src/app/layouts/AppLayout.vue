@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 
-import AppHeader from '@/shared/components/common/AppHeader.vue'
 </script>
 
 <template>
   <div
     class="min-h-screen bg-linear-to-b from-recipe-sand-w70 via-white to-recipe-mint-w82 text-recipe-ink"
   >
-    <AppHeader />
-    <main class="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <main class="w-full px-4 py-10 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       <RouterView />
     </main>
   </div>
