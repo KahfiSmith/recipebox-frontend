@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
+import { reactive, ref } from 'vue'
 
 import { Button, Input } from '@/shared/components/ui'
 import { useAuth } from '@/shared/composables/useAuth'
@@ -31,17 +31,6 @@ const profileSuccess = ref('')
 const preferencesSuccess = ref('')
 const passwordError = ref('')
 const passwordSuccess = ref('')
-
-const initials = computed(() => {
-  const name = profileForm.name.trim()
-  if (!name) return 'RB'
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('')
-})
 
 const handleProfileSave = () => {
   profileError.value = ''
@@ -88,32 +77,10 @@ const handlePasswordSave = () => {
   passwordForm.newPassword = ''
   passwordForm.confirmPassword = ''
 }
-
 </script>
 
 <template>
   <div class="space-y-8">
-    <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div class="space-y-2">
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-recipe-orange">Profile</p>
-        <h1 class="text-2xl font-semibold text-recipe-ink">Manage your account</h1>
-        <p class="text-sm text-slate-600">Update your profile, preferences, and security.</p>
-      </div>
-      <div class="flex items-center gap-3 rounded-2xl border border-recipe-sand-b10 bg-white px-4 py-3">
-        <div
-          class="flex h-12 w-12 items-center justify-center rounded-full bg-recipe-orange text-sm font-semibold text-white"
-        >
-          {{ initials }}
-        </div>
-        <div>
-          <p class="text-sm font-semibold text-recipe-ink">
-            {{ profileForm.name || 'Recipe Box User' }}
-          </p>
-          <p class="text-xs text-slate-500">{{ profileForm.email }}</p>
-        </div>
-      </div>
-    </header>
-
     <div class="grid gap-6 lg:grid-cols-[1.4fr,1fr]">
       <div class="rounded-2xl border border-recipe-sand-b10 bg-white p-6 shadow-sm">
         <div class="space-y-1">
@@ -126,7 +93,12 @@ const handlePasswordSave = () => {
             <Input v-model="profileForm.name" label="Full name" name="name" required />
             <Input v-model="profileForm.email" label="Email" name="email" required />
           </div>
-          <Input v-model="profileForm.location" label="Location" name="location" placeholder="City" />
+          <Input
+            v-model="profileForm.location"
+            label="Location"
+            name="location"
+            placeholder="City"
+          />
 
           <p
             v-if="profileError"
