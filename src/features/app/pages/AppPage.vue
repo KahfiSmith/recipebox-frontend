@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query'
 import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
 import AppMealPlannerPanel from '@/features/app/components/AppMealPlannerPanel.vue'
 import AppOverviewPanel from '@/features/app/components/AppOverviewPanel.vue'
 import AppRecipesPanel from '@/features/app/components/AppRecipesPanel.vue'
 import AppShoppingListPanel from '@/features/app/components/AppShoppingListPanel.vue'
-import AppSidebar from '@/features/app/components/AppSidebar.vue'
 import { dashboardService } from '@/features/app/services/dashboardService'
 import type {
   AddIngredientsPayload,
-  DashboardMenuItem,
   DashboardMenuKey,
   MealPlanEntry,
   MealPlanPayload,
@@ -19,32 +18,27 @@ import type {
   ShoppingItem,
   ShoppingPayload,
 } from '@/features/app/types'
+import { useAuth } from '@/shared/composables/useAuth'
 
 const hasApiBaseUrl = Boolean(import.meta.env.VITE_API_BASE_URL)
-const activeMenu = ref<DashboardMenuKey>('overview')
+const route = useRoute()
+const { isAuthenticated, sessionReady } = useAuth()
 
-const primaryMenu: DashboardMenuItem[] = [
-  {
-    key: 'overview',
-    label: 'Overview',
-    description: 'See your activity at a glance',
-  },
-  {
-    key: 'recipes',
-    label: 'Recipes',
-    description: 'Keep your favorite recipes in one place',
-  },
-  {
-    key: 'meal-planner',
-    label: 'Meal Planner',
-    description: 'Plan this week\'s meals',
-  },
-  {
-    key: 'shopping-list',
-    label: 'Shopping List',
-    description: 'Track ingredients you need to buy',
-  },
-]
+const isDashboardMenuKey = (value: unknown): value is DashboardMenuKey =>
+  value === 'overview'
+  || value === 'recipes'
+  || value === 'meal-planner'
+  || value === 'shopping-list'
+
+const activeMenu = computed<DashboardMenuKey>(() => {
+  const rawValue = route.query.menu
+
+  if (typeof rawValue === 'string' && isDashboardMenuKey(rawValue)) {
+    return rawValue
+  }
+
+  return 'overview'
+})
 
 const recipes = ref<RecipeItem[]>([
   { id: 'recipe-1', name: 'Chicken Stir Fry', category: 'Dinner', prepTime: 25 },
@@ -191,12 +185,21 @@ const shoppingMenuOptions = computed(() => {
 const dashboardQuery = useQuery({
   queryKey: ['dashboard-overview'],
   queryFn: dashboardService.getDashboard,
-  enabled: hasApiBaseUrl,
+  enabled: computed(() =>
+    hasApiBaseUrl && sessionReady.value && isAuthenticated.value),
 })
 
 const overviewStatusMessage = computed(() => {
   if (!hasApiBaseUrl) {
     return 'Workspace masih memakai data lokal karena VITE_API_BASE_URL belum di-set.'
+  }
+
+  if (!sessionReady.value) {
+    return 'Restoring session before loading dashboard summary...'
+  }
+
+  if (!isAuthenticated.value) {
+    return 'Dashboard summary from API tersedia setelah login.'
   }
 
   if (dashboardQuery.isPending.value) {
@@ -219,38 +222,34 @@ const overviewShoppingItemCount = computed(() =>
 </script>
 
 <template>
-  <section class="grid min-h-[70vh] grid-cols-[260px_minmax(0,1fr)] items-start gap-5">
-    <AppSidebar :active-menu="activeMenu" :menu-items="primaryMenu" @change-menu="activeMenu = $event" />
-
-    <AppOverviewPanel
-      v-if="activeMenu === 'overview'"
-      :recipe-count="overviewRecipeCount"
-      :planned-meals-count="overviewMealPlanCount"
-      :shopping-items-count="overviewShoppingItemCount"
-      :status-message="overviewStatusMessage"
-    />
-    <AppRecipesPanel
-      v-else-if="activeMenu === 'recipes'"
-      :recipes="recipes"
-      @save-recipe="saveRecipe"
-      @delete-recipe="deleteRecipe"
-    />
-    <AppMealPlannerPanel
-      v-else-if="activeMenu === 'meal-planner'"
-      :entries="mealPlanEntries"
-      @save-entry="saveMealPlanEntry"
-      @delete-entry="deleteMealPlanEntry"
-      @toggle-cooked="toggleMealCooked"
-      @add-ingredients="addIngredientsToShopping"
-    />
-    <AppShoppingListPanel
-      v-else
-      :items="shoppingItems"
-      :menu-options="shoppingMenuOptions"
-      @save-item="saveShoppingItem"
-      @delete-item="deleteShoppingItem"
-      @toggle-item="toggleShoppingItem"
-      @clear-checked="clearCheckedShoppingItems"
-    />
-  </section>
+  <AppOverviewPanel
+    v-if="activeMenu === 'overview'"
+    :recipe-count="overviewRecipeCount"
+    :planned-meals-count="overviewMealPlanCount"
+    :shopping-items-count="overviewShoppingItemCount"
+    :status-message="overviewStatusMessage"
+  />
+  <AppRecipesPanel
+    v-else-if="activeMenu === 'recipes'"
+    :recipes="recipes"
+    @save-recipe="saveRecipe"
+    @delete-recipe="deleteRecipe"
+  />
+  <AppMealPlannerPanel
+    v-else-if="activeMenu === 'meal-planner'"
+    :entries="mealPlanEntries"
+    @save-entry="saveMealPlanEntry"
+    @delete-entry="deleteMealPlanEntry"
+    @toggle-cooked="toggleMealCooked"
+    @add-ingredients="addIngredientsToShopping"
+  />
+  <AppShoppingListPanel
+    v-else
+    :items="shoppingItems"
+    :menu-options="shoppingMenuOptions"
+    @save-item="saveShoppingItem"
+    @delete-item="deleteShoppingItem"
+    @toggle-item="toggleShoppingItem"
+    @clear-checked="clearCheckedShoppingItems"
+  />
 </template>
