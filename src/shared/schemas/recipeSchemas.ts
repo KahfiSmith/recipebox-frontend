@@ -6,6 +6,9 @@ const numericLikeSchema = z.union([
   z.number(),
   trimmedString.regex(/^\d+$/, 'Must be a number').transform(Number),
 ]).pipe(z.number().int().nonnegative())
+const positiveNumericLikeSchema = numericLikeSchema.refine((value) => value > 0, {
+  message: 'Prep time must be greater than 0',
+})
 
 export const recipeSchema = z.object({
   id: recipeIdSchema,
@@ -20,6 +23,12 @@ export const recipeSchema = z.object({
   category: recipe.category || 'Uncategorized',
   prepTime: recipe.prepTime ?? recipe.prepTimeMinutes ?? recipe.prep_time_minutes ?? 0,
 }))
+
+export const recipePayloadSchema = z.object({
+  name: trimmedString.min(2, 'Recipe name must be at least 2 characters'),
+  category: trimmedString.min(2, 'Category must be at least 2 characters'),
+  prepTime: positiveNumericLikeSchema,
+})
 
 const paginationSchema = z.object({
   limit: numericLikeSchema.optional(),
@@ -73,5 +82,18 @@ export const recipeListResponseSchema = z.union([
   recipeListDataSchema,
 ])
 
+export const recipeResponseSchema = z.union([
+  z.object({
+    data: recipeSchema,
+  }).passthrough().transform((payload) => payload.data),
+  z.object({
+    data: z.object({
+      recipe: recipeSchema,
+    }).passthrough(),
+  }).passthrough().transform((payload) => payload.data.recipe),
+  recipeSchema,
+])
+
 export type Recipe = z.infer<typeof recipeSchema>
+export type RecipePayloadInput = z.infer<typeof recipePayloadSchema>
 export type RecipeListResponse = z.infer<typeof recipeListResponseSchema>

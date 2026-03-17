@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useQuery } from '@tanstack/vue-query'
-import { computed, ref } from 'vue'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
+import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 import AppMealPlannerPanel from '@/features/app/components/AppMealPlannerPanel.vue'
@@ -20,11 +20,11 @@ import type {
   ShoppingPayload,
 } from '@/features/app/types'
 import { useAuth } from '@/shared/composables/useAuth'
-import { watch } from 'vue'
 
 const hasApiBaseUrl = Boolean(import.meta.env.VITE_API_BASE_URL)
 const route = useRoute()
 const { isAuthenticated, sessionReady } = useAuth()
+const queryClient = useQueryClient()
 
 const isDashboardMenuKey = (value: unknown): value is DashboardMenuKey =>
   value === 'overview'
@@ -65,24 +65,6 @@ const shoppingItems = ref<ShoppingItem[]>([
     sourceLabel: 'General',
   },
 ])
-
-const saveRecipe = (payload: RecipePayload) => {
-  if (payload.id) {
-    recipes.value = recipes.value.map((recipe) =>
-      recipe.id === payload.id ? { ...recipe, ...payload, id: payload.id } : recipe,
-    )
-    return
-  }
-
-  recipes.value.unshift({
-    id: crypto.randomUUID(),
-    ...payload,
-  })
-}
-
-const deleteRecipe = (id: string) => {
-  recipes.value = recipes.value.filter((recipe) => recipe.id !== id)
-}
 
 const saveMealPlanEntry = (payload: MealPlanPayload) => {
   if (payload.id) {
@@ -198,6 +180,32 @@ const recipesQuery = useQuery({
     && activeMenu.value === 'recipes'),
 })
 
+const saveRecipeMutation = useMutation({
+  mutationFn: async (payload: RecipePayload) => {
+    if (payload.id) {
+      return recipeService.updateRecipe(payload.id, payload)
+    }
+
+    return recipeService.createRecipe(payload)
+  },
+  onSuccess: async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['recipes'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard-overview'] }),
+    ])
+  },
+})
+
+const deleteRecipeMutation = useMutation({
+  mutationFn: (id: string) => recipeService.deleteRecipe(id),
+  onSuccess: async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['recipes'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard-overview'] }),
+    ])
+  },
+})
+
 watch(
   () => recipesQuery.data.value,
   (data) => {
@@ -214,7 +222,21 @@ const overviewMealPlanCount = computed(() =>
 const overviewShoppingItemCount = computed(() =>
   dashboardQuery.data.value?.summary.pendingShoppingItemCount ?? shoppingItems.value.length)
 const recipeErrorMessage = computed(() =>
-  recipesQuery.error.value instanceof Error ? recipesQuery.error.value.message : '')
+  recipesQuery.error.value instanceof Error
+    ? recipesQuery.error.value.message
+    : saveRecipeMutation.error.value instanceof Error
+      ? saveRecipeMutation.error.value.message
+      : deleteRecipeMutation.error.value instanceof Error
+        ? deleteRecipeMutation.error.value.message
+        : '')
+
+const saveRecipe = async (payload: RecipePayload) => {
+  await saveRecipeMutation.mutateAsync(payload)
+}
+
+const deleteRecipe = async (id: string) => {
+  await deleteRecipeMutation.mutateAsync(id)
+}
 </script>
 
 <template>
@@ -227,7 +249,7 @@ const recipeErrorMessage = computed(() =>
   <AppRecipesPanel
     v-else-if="activeMenu === 'recipes'"
     :recipes="recipes"
-    :is-loading="recipesQuery.isPending.value"
+    :is-loading="recipesQuery.isPending.value || saveRecipeMutation.isPending.value || deleteRecipeMutation.isPending.value"
     :error-message="recipeErrorMessage"
     @save-recipe="saveRecipe"
     @delete-recipe="deleteRecipe"
