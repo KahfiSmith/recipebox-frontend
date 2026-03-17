@@ -66,7 +66,7 @@ onBeforeUnmount(() => {
 
 <template>
   <aside
-    class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto rounded-[28px] border border-recipe-sand-b10 bg-white p-4 shadow-sm"
+    class="sticky top-24 self-start max-h-[calc(100vh-7rem)] overflow-y-auto rounded-[28px] border border-recipe-sand-b10 bg-white p-4 shadow-sm"
   >
     <div class="mb-4 rounded-[22px] border border-recipe-sand-b12 bg-linear-to-br from-recipe-sand-w75 via-white to-recipe-orange-w85 p-4">
       <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-recipe-orange">
@@ -90,7 +90,7 @@ onBeforeUnmount(() => {
           class="block w-full rounded-[20px] border px-3 py-3 text-left transition"
           :class="
             isActive(item.key)
-              ? 'border-recipe-orange-b10 bg-recipe-orange-w85 text-recipe-ink shadow-[0_16px_30px_-24px_rgba(238,155,106,0.95)]'
+              ? 'border-recipe-orange-b10 shadow-[0_16px_30px_-24px_rgba(238,155,106,0.95)]'
               : 'border-recipe-sand-b10 bg-white text-slate-700 hover:border-recipe-sand hover:bg-recipe-sand-w70'
           "
         >
