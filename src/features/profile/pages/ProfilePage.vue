@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
 
 import { Button, Input } from '@/shared/components/ui'
 import { useAuth } from '@/shared/composables/useAuth'
 import { isEmail, isMinLength } from '@/shared/lib/validators'
 
-const { logout, user } = useAuth()
-const router = useRouter()
+const { user } = useAuth()
 
 const profileForm = reactive({
   name: user.value?.name ?? 'Demo User',
@@ -33,9 +31,6 @@ const profileSuccess = ref('')
 const preferencesSuccess = ref('')
 const passwordError = ref('')
 const passwordSuccess = ref('')
-const logoutError = ref('')
-const isLoggingOut = ref(false)
-const showLogoutConfirm = ref(false)
 
 const initials = computed(() => {
   const name = profileForm.name.trim()
@@ -94,29 +89,6 @@ const handlePasswordSave = () => {
   passwordForm.confirmPassword = ''
 }
 
-const handleLogout = async () => {
-  logoutError.value = ''
-  showLogoutConfirm.value = false
-  isLoggingOut.value = true
-
-  try {
-    await logout()
-    await router.push({ name: 'login' })
-  } catch (error) {
-    logoutError.value = error instanceof Error ? error.message : 'Logout failed'
-  } finally {
-    isLoggingOut.value = false
-  }
-}
-
-const handleLogoutIntent = () => {
-  logoutError.value = ''
-  showLogoutConfirm.value = true
-}
-
-const handleLogoutCancel = () => {
-  showLogoutConfirm.value = false
-}
 </script>
 
 <template>
@@ -127,52 +99,17 @@ const handleLogoutCancel = () => {
         <h1 class="text-2xl font-semibold text-recipe-ink">Manage your account</h1>
         <p class="text-sm text-slate-600">Update your profile, preferences, and security.</p>
       </div>
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div class="flex items-center gap-3 rounded-2xl border border-recipe-sand-b10 bg-white px-4 py-3">
-          <div
-            class="flex h-12 w-12 items-center justify-center rounded-full bg-recipe-orange text-sm font-semibold text-white"
-          >
-            {{ initials }}
-          </div>
-          <div>
-            <p class="text-sm font-semibold text-recipe-ink">
-              {{ profileForm.name || 'Recipe Box User' }}
-            </p>
-            <p class="text-xs text-slate-500">{{ profileForm.email }}</p>
-          </div>
+      <div class="flex items-center gap-3 rounded-2xl border border-recipe-sand-b10 bg-white px-4 py-3">
+        <div
+          class="flex h-12 w-12 items-center justify-center rounded-full bg-recipe-orange text-sm font-semibold text-white"
+        >
+          {{ initials }}
         </div>
-        <div class="flex flex-col items-stretch gap-2 sm:items-end">
-          <Button
-            variant="secondary"
-            class="w-full sm:w-auto"
-            :disabled="isLoggingOut"
-            @click="handleLogoutIntent"
-          >
-            {{ isLoggingOut ? 'Signing out...' : 'Logout' }}
-          </Button>
-          <div
-            v-if="showLogoutConfirm"
-            class="w-full rounded-2xl border border-recipe-sand-b10 bg-white p-3 text-sm shadow-sm sm:max-w-xs"
-          >
-            <p class="text-slate-700">Are you sure you want to logout?</p>
-            <div class="mt-3 flex gap-2">
-              <Button class="flex-1" :disabled="isLoggingOut" @click="handleLogout">Yes</Button>
-              <Button
-                variant="secondary"
-                class="flex-1"
-                :disabled="isLoggingOut"
-                @click="handleLogoutCancel"
-              >
-                No
-              </Button>
-            </div>
-          </div>
-          <p
-            v-if="logoutError"
-            class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-          >
-            {{ logoutError }}
+        <div>
+          <p class="text-sm font-semibold text-recipe-ink">
+            {{ profileForm.name || 'Recipe Box User' }}
           </p>
+          <p class="text-xs text-slate-500">{{ profileForm.email }}</p>
         </div>
       </div>
     </header>

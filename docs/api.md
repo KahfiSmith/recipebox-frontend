@@ -59,9 +59,9 @@ For full request/response schemas, use generated Swagger files.
 - `POST /api/v1/auth/refresh` accepts refresh token from cookie first, and falls back to request body (`refreshToken`).
 - `POST /api/v1/auth/logout` revokes refresh token and clears cookie; when a bearer access token is provided, access session is revoked/blacklisted.
 - Access tokens are validated via JWT middleware and checked against Redis-backed auth state.
-- Frontend currently expects `POST /auth/login` success responses in nested form under `data`, specifically `data.user` and `data.tokens.accessToken`.
-- Frontend currently expects `POST /auth/refresh` success responses in direct form under `data`, specifically `data.accessToken`, then resolves the current user via `GET /auth/me`.
-- Frontend currently expects `POST /auth/register` and `GET /auth/me` success responses in nested form under `data.user`.
+- Frontend currently accepts `POST /auth/login` success responses in either nested token form (`data.user` + `data.tokens.accessToken`) or direct token form (`data.user` + `data.accessToken`).
+- Frontend currently accepts `POST /auth/refresh` success responses in either direct token form (`data.accessToken`) or nested token form (`data.tokens.accessToken`); if user data is omitted, frontend resolves the current user via `GET /auth/me`.
+- Frontend currently expects `POST /auth/register` success responses in nested form under `data.user`, and accepts `GET /auth/me` success responses in either nested form (`data.user`) or direct user form under `data`.
 - Frontend also normalizes numeric user ids from auth endpoints into string ids in client state.
 
 ## Dashboard Performance Notes
