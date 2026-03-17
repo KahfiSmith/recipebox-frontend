@@ -19,15 +19,22 @@ const baseRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: '',
-        name: 'app',
-        component: () => import('@/features/app/pages/AppPage.vue'),
-        meta: { title: 'App' },
-      },
-      {
-        path: 'profile',
-        name: 'profile',
-        component: () => import('@/features/profile/pages/ProfilePage.vue'),
-        meta: { title: 'Profile', requiresAuth: true },
+        component: () => import('@/features/app/layouts/AppWorkspaceLayout.vue'),
+        meta: { requiresAuth: true },
+        children: [
+          {
+            path: '',
+            name: 'app',
+            component: () => import('@/features/app/pages/AppPage.vue'),
+            meta: { title: 'App' },
+          },
+          {
+            path: 'profile',
+            name: 'profile',
+            component: () => import('@/features/profile/pages/ProfilePage.vue'),
+            meta: { title: 'Profile' },
+          },
+        ],
       },
     ],
   },
