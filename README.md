@@ -18,7 +18,7 @@ Frontend untuk aplikasi Recipebox berbasis Vue 3 + Vite + TypeScript dengan stru
 - Form auth memakai TanStack Query mutation untuk request lifecycle, sementara auth state tetap di Pinia.
 - Session auth mencoba dipulihkan lewat `/auth/refresh` lalu `/auth/me` saat `VITE_API_BASE_URL` tersedia.
 - Route guard aktif untuk `requiresAuth` dan `guestOnly`.
-- Halaman `/app` berfungsi sebagai workspace lokal untuk recipes, meal planner, dan shopping list; overview akan membaca summary dari `GET /dashboard` saat `VITE_API_BASE_URL` tersedia.
+- Halaman `/app` memakai `GET /dashboard` untuk overview summary saat `VITE_API_BASE_URL` tersedia, dan panel recipes sudah terhubung ke `GET/POST/PUT/DELETE /recipes`.
 - Halaman `/app/profile` sudah tersedia (form profile, preferences, dan update password di sisi client).
 
 ## Prasyarat
@@ -90,7 +90,7 @@ pnpm format     # prettier untuk src/
 │  │  │  ├─ pages/*Page.vue        # halaman auth
 │  │  │  ├─ services/authService.ts
 │  │  │  └─ stores/authStore.ts
-│  │  ├─ app/pages/AppPage.vue     # workspace lokal + summary overview dari API dashboard saat tersedia
+│  │  ├─ app/pages/AppPage.vue     # workspace app + query overview dashboard dan recipes
 │  │  ├─ home/pages/HomePage.vue
 │  │  ├─ profile/pages/ProfilePage.vue
 │  │  └─ misc/pages/NotFoundPage.vue
@@ -126,6 +126,7 @@ pnpm format     # prettier untuk src/
 - Server-state UI: TanStack Query di-bootstrap dari `src/app/queryClient.ts` dan dipakai untuk mutation auth/debug yang memanggil backend.
 - Auth service: `src/features/auth/services/authService.ts` mengikuti endpoint auth di `docs/api.md`, memvalidasi payload/response auth dengan Zod, dan punya fallback mock untuk development saat API base URL belum di-set.
 - Dashboard service: `src/features/app/services/dashboardService.ts` memanggil `GET /api/v1/dashboard` dan memvalidasi shape response summary dengan Zod sebelum dipakai di overview.
+- Recipe service: `src/features/app/services/recipeService.ts` memanggil `GET/POST/PUT/DELETE /api/v1/recipes`, memvalidasi payload/response recipe dengan Zod, dan dipakai oleh TanStack Query di panel recipes.
 - Alias import: `@` mengarah ke `src/` (lihat `vite.config.ts`).
 
 ## Troubleshooting
