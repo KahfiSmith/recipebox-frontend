@@ -8,6 +8,7 @@ import AppOverviewPanel from '@/features/app/components/AppOverviewPanel.vue'
 import AppRecipesPanel from '@/features/app/components/AppRecipesPanel.vue'
 import AppShoppingListPanel from '@/features/app/components/AppShoppingListPanel.vue'
 import { dashboardService } from '@/features/app/services/dashboardService'
+import { recipeService } from '@/features/app/services/recipeService'
 import type {
   AddIngredientsPayload,
   DashboardMenuKey,
@@ -19,6 +20,7 @@ import type {
   ShoppingPayload,
 } from '@/features/app/types'
 import { useAuth } from '@/shared/composables/useAuth'
+import { watch } from 'vue'
 
 const hasApiBaseUrl = Boolean(import.meta.env.VITE_API_BASE_URL)
 const route = useRoute()
@@ -40,10 +42,7 @@ const activeMenu = computed<DashboardMenuKey>(() => {
   return 'overview'
 })
 
-const recipes = ref<RecipeItem[]>([
-  { id: 'recipe-1', name: 'Chicken Stir Fry', category: 'Dinner', prepTime: 25 },
-  { id: 'recipe-2', name: 'Overnight Oats', category: 'Breakfast', prepTime: 10 },
-])
+const recipes = ref<RecipeItem[]>([])
 
 const mealPlanEntries = ref<MealPlanEntry[]>([
   {
@@ -189,29 +188,24 @@ const dashboardQuery = useQuery({
     hasApiBaseUrl && sessionReady.value && isAuthenticated.value),
 })
 
-const overviewStatusMessage = computed(() => {
-  if (!hasApiBaseUrl) {
-    return 'Workspace masih memakai data lokal karena VITE_API_BASE_URL belum di-set.'
-  }
-
-  if (!sessionReady.value) {
-    return 'Restoring session before loading dashboard summary...'
-  }
-
-  if (!isAuthenticated.value) {
-    return 'Dashboard summary from API tersedia setelah login.'
-  }
-
-  if (dashboardQuery.isPending.value) {
-    return 'Loading dashboard summary from API...'
-  }
-
-  if (dashboardQuery.error.value instanceof Error) {
-    return dashboardQuery.error.value.message
-  }
-
-  return 'Dashboard summary loaded from API.'
+const recipesQuery = useQuery({
+  queryKey: ['recipes', 20, 0],
+  queryFn: () => recipeService.getRecipes({ limit: 20, offset: 0 }),
+  enabled: computed(() =>
+    hasApiBaseUrl
+    && sessionReady.value
+    && isAuthenticated.value
+    && activeMenu.value === 'recipes'),
 })
+
+watch(
+  () => recipesQuery.data.value,
+  (data) => {
+    if (!data) return
+    recipes.value = data.items
+  },
+  { immediate: true },
+)
 
 const overviewRecipeCount = computed(() =>
   dashboardQuery.data.value?.summary.recipeCount ?? recipes.value.length)
@@ -219,6 +213,8 @@ const overviewMealPlanCount = computed(() =>
   dashboardQuery.data.value?.summary.upcomingMealPlanCount ?? mealPlanEntries.value.length)
 const overviewShoppingItemCount = computed(() =>
   dashboardQuery.data.value?.summary.pendingShoppingItemCount ?? shoppingItems.value.length)
+const recipeErrorMessage = computed(() =>
+  recipesQuery.error.value instanceof Error ? recipesQuery.error.value.message : '')
 </script>
 
 <template>
@@ -227,11 +223,12 @@ const overviewShoppingItemCount = computed(() =>
     :recipe-count="overviewRecipeCount"
     :planned-meals-count="overviewMealPlanCount"
     :shopping-items-count="overviewShoppingItemCount"
-    :status-message="overviewStatusMessage"
   />
   <AppRecipesPanel
     v-else-if="activeMenu === 'recipes'"
     :recipes="recipes"
+    :is-loading="recipesQuery.isPending.value"
+    :error-message="recipeErrorMessage"
     @save-recipe="saveRecipe"
     @delete-recipe="deleteRecipe"
   />
