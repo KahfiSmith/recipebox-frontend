@@ -80,7 +80,7 @@ const handleSubmit = async () => {
       <span class="text-slate-600">Already have an account?</span>
       <RouterLink
         to="/auth/login"
-        class="inline-flex items-center justify-center rounded-full border border-recipe-orange-b8 bg-recipe-orange-w85 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-recipe-orange-b35 shadow-[0_10px_22px_-18px_rgba(238,155,106,0.7)] transition hover:bg-recipe-orange hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-recipe-orange"
+        class="inline-flex items-center justify-center rounded-full border border-recipe-orange-b8 bg-recipe-orange-w85 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-recipe-orange-b35 shadow-[0_10px_22px_-18px_rgba(238,155,106,0.7)] transition hover:bg-recipe-orange hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-recipe-orange"
       >
         Log in
       </RouterLink>

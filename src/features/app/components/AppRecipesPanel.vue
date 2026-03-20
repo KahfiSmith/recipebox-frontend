@@ -7,6 +7,8 @@ import { isMinLength } from '@/shared/lib/validators'
 
 const props = defineProps<{
   recipes: RecipeItem[]
+  isLoading?: boolean
+  errorMessage?: string
 }>()
 
 const emit = defineEmits<{
@@ -129,6 +131,20 @@ const handleDelete = (id: string) => {
         <h2 class="text-lg font-semibold text-recipe-ink">Recipe list</h2>
         <p class="text-sm text-slate-500">{{ props.recipes.length }} item</p>
       </div>
+
+      <p
+        v-if="props.errorMessage"
+        class="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+      >
+        {{ props.errorMessage }}
+      </p>
+
+      <p
+        v-if="props.isLoading"
+        class="mb-4 rounded-lg border border-recipe-sand-b10 bg-recipe-sand-w75 px-3 py-2 text-sm text-slate-600"
+      >
+        Loading recipes from database...
+      </p>
 
       <div v-if="props.recipes.length" class="space-y-3">
         <article

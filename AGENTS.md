@@ -9,7 +9,7 @@ Fokus saat ini:
 
 - Landing page marketing di `/`
 - Auth flow dasar di `/auth/*`, dengan login/register/forgot password/verify email/reset password sudah terhubung ke `authService`
-- Workspace `/app` berisi panel overview, recipes, meal planner, dan shopping list dengan state lokal/in-memory
+- Workspace `/app` berisi panel overview, recipes, meal planner, dan shopping list; overview dan recipes sudah bisa terhubung ke backend, sementara meal planner dan shopping list masih memakai state lokal/in-memory
 - Profile page terproteksi di `/app/profile`
 
 ## 2. Tech Stack & Tools
@@ -131,5 +131,5 @@ Contoh:
 1. `/` sudah berfungsi sebagai landing page marketing dengan section `#features`, `#how-it-works`, dan `#preview`.
 2. `/auth/login` memakai `authService.login()`, guard menunggu `initializeSession()`, dan session mencoba dipulihkan via `/auth/refresh` + `/auth/me` saat API tersedia.
 3. `/auth/register`, `/auth/forgot-password`, `/auth/verify-email`, dan `/auth/reset-password` sudah memanggil endpoint auth terkait melalui `authService`.
-4. `/app` adalah workspace lokal berbasis state in-memory untuk overview, recipes, meal planner, dan shopping list.
+4. `/app` memakai backend untuk summary overview dan recipes saat API tersedia; meal planner dan shopping list masih berbasis state lokal/in-memory.
 5. `/app/profile` dilindungi `requiresAuth` dan saat ini masih berbasis form client-side tanpa persist ke backend.

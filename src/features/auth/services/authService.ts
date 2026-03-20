@@ -6,6 +6,7 @@ import {
   loginPayloadSchema,
   registerPayloadSchema,
   registerResponseSchema,
+  refreshResponseSchema,
   resetPasswordPayloadSchema,
   verifyEmailConfirmPayloadSchema,
   verifyEmailRequestPayloadSchema,
@@ -18,9 +19,7 @@ import type {
   AuthResponse,
   ForgotPasswordPayload,
   LoginPayload,
-  RawAuthResponse,
   RawRegisterResponse,
-  RawUserResponse,
   RegisterPayload,
   ResetPasswordPayload,
   User,
@@ -78,14 +77,14 @@ export const authService = {
       })
     }
 
-    const response = await apiClient.post<RawAuthResponse, LoginPayload>(
+    const response = await apiClient.post<unknown, LoginPayload>(
       apiEndpoints.auth.login,
       validatedPayload,
     )
     const parsed = parseWithSchema(authResponseSchema, response, 'Invalid auth response from API')
 
     return {
-      accessToken: parsed.data.tokens.accessToken,
+      accessToken: parsed.data.accessToken,
       user: parsed.data.user,
     }
   },
@@ -200,7 +199,7 @@ export const authService = {
   },
 
   async refresh(): Promise<AuthResponse> {
-    const response = await apiClient.post<RawAuthResponse, Record<string, never>>(
+    const response = await apiClient.post<unknown, Record<string, never>>(
       apiEndpoints.auth.refresh,
       {},
       {
@@ -208,16 +207,16 @@ export const authService = {
         skipUnauthorizedHandler: true,
       },
     )
-    const parsed = parseWithSchema(authResponseSchema, response, 'Invalid auth response from API')
+    const parsed = parseWithSchema(refreshResponseSchema, response, 'Invalid refresh response from API')
 
     return {
-      accessToken: parsed.data.tokens.accessToken,
+      accessToken: parsed.data.accessToken,
       user: parsed.data.user,
     }
   },
 
   async getCurrentUser(): Promise<User> {
-    const response = await apiClient.get<RawUserResponse>(apiEndpoints.auth.me)
+    const response = await apiClient.get<unknown>(apiEndpoints.auth.me)
     const parsed = parseWithSchema(currentUserResponseSchema, response, 'Invalid user response from API')
 
     return parsed.data.user

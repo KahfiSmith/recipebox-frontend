@@ -5,7 +5,7 @@ export interface User {
 }
 
 export interface RawApiUser {
-  id: number
+  id: number | string
   name: string
   email: string
   emailVerifiedAt?: string | null
@@ -49,24 +49,6 @@ export interface ApiMessageResponse {
 export interface AuthResponse {
   accessToken: string
   user: User | null
-}
-
-export interface RawAuthResponse {
-  data: {
-    user: RawApiUser
-    tokens: {
-      accessToken: string
-      accessTokenExpiresAt?: string
-      refreshToken?: string
-      refreshTokenExpiresAt?: string
-    }
-  }
-}
-
-export interface RawUserResponse {
-  data: {
-    user: RawApiUser
-  }
 }
 
 export interface RawRegisterResponse {

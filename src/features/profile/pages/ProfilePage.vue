@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { reactive, ref } from 'vue'
 
 import { Button, Input } from '@/shared/components/ui'
 import { useAuth } from '@/shared/composables/useAuth'
 import { isEmail, isMinLength } from '@/shared/lib/validators'
 
-const { logout, user } = useAuth()
-const router = useRouter()
+const { user } = useAuth()
 
 const profileForm = reactive({
   name: user.value?.name ?? 'Demo User',
@@ -33,20 +31,6 @@ const profileSuccess = ref('')
 const preferencesSuccess = ref('')
 const passwordError = ref('')
 const passwordSuccess = ref('')
-const logoutError = ref('')
-const isLoggingOut = ref(false)
-const showLogoutConfirm = ref(false)
-
-const initials = computed(() => {
-  const name = profileForm.name.trim()
-  if (!name) return 'RB'
-  return name
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? '')
-    .join('')
-})
 
 const handleProfileSave = () => {
   profileError.value = ''
@@ -93,96 +77,10 @@ const handlePasswordSave = () => {
   passwordForm.newPassword = ''
   passwordForm.confirmPassword = ''
 }
-
-const handleLogout = async () => {
-  logoutError.value = ''
-  showLogoutConfirm.value = false
-  isLoggingOut.value = true
-
-  try {
-    await logout()
-    await router.push({ name: 'login' })
-  } catch (error) {
-    logoutError.value = error instanceof Error ? error.message : 'Logout failed'
-  } finally {
-    isLoggingOut.value = false
-  }
-}
-
-const handleLogoutIntent = () => {
-  logoutError.value = ''
-  showLogoutConfirm.value = true
-}
-
-const handleLogoutCancel = () => {
-  showLogoutConfirm.value = false
-}
 </script>
 
 <template>
-  <section class="space-y-8">
-    <header class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div class="space-y-2">
-        <p class="text-xs font-semibold uppercase tracking-[0.2em] text-recipe-orange">Profile</p>
-        <h1 class="text-2xl font-semibold text-recipe-ink">Manage your account</h1>
-        <p class="text-sm text-slate-600">Update your profile, preferences, and security.</p>
-      </div>
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div class="flex items-center gap-3 rounded-2xl border border-recipe-sand-b10 bg-white px-4 py-3">
-          <div
-            class="flex h-12 w-12 items-center justify-center rounded-full bg-recipe-orange text-sm font-semibold text-white"
-          >
-            {{ initials }}
-          </div>
-          <div>
-            <p class="text-sm font-semibold text-recipe-ink">
-              {{ profileForm.name || 'Recipe Box User' }}
-            </p>
-            <p class="text-xs text-slate-500">{{ profileForm.email }}</p>
-          </div>
-        </div>
-        <div class="flex flex-col items-stretch gap-2 sm:items-end">
-          <Button
-            variant="secondary"
-            class="w-full sm:w-auto"
-            :disabled="isLoggingOut"
-            @click="handleLogoutIntent"
-          >
-            {{ isLoggingOut ? 'Signing out...' : 'Logout' }}
-          </Button>
-          <div
-            v-if="showLogoutConfirm"
-            class="w-full rounded-2xl border border-recipe-sand-b10 bg-white p-3 text-sm shadow-sm sm:max-w-xs"
-          >
-            <p class="text-slate-700">Are you sure you want to logout?</p>
-            <div class="mt-3 flex gap-2">
-              <Button
-                class="flex-1"
-                :disabled="isLoggingOut"
-                @click="handleLogout"
-              >
-                Yes
-              </Button>
-              <Button
-                variant="secondary"
-                class="flex-1"
-                :disabled="isLoggingOut"
-                @click="handleLogoutCancel"
-              >
-                No
-              </Button>
-            </div>
-          </div>
-          <p
-            v-if="logoutError"
-            class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-          >
-            {{ logoutError }}
-          </p>
-        </div>
-      </div>
-    </header>
-
+  <div class="space-y-8">
     <div class="grid gap-6 lg:grid-cols-[1.4fr,1fr]">
       <div class="rounded-2xl border border-recipe-sand-b10 bg-white p-6 shadow-sm">
         <div class="space-y-1">
@@ -195,7 +93,12 @@ const handleLogoutCancel = () => {
             <Input v-model="profileForm.name" label="Full name" name="name" required />
             <Input v-model="profileForm.email" label="Email" name="email" required />
           </div>
-          <Input v-model="profileForm.location" label="Location" name="location" placeholder="City" />
+          <Input
+            v-model="profileForm.location"
+            label="Location"
+            name="location"
+            placeholder="City"
+          />
 
           <p
             v-if="profileError"
@@ -279,59 +182,59 @@ const handleLogoutCancel = () => {
           </div>
         </form>
       </div>
-    </div>
 
-    <div class="rounded-2xl border border-recipe-sand-b10 bg-white p-6 shadow-sm">
-      <div class="space-y-1">
-        <h2 class="text-lg font-semibold text-recipe-ink">Security</h2>
-        <p class="text-sm text-slate-600">Update your password regularly.</p>
+      <div class="rounded-2xl border border-recipe-sand-b10 bg-white p-6 shadow-sm">
+        <div class="space-y-1">
+          <h2 class="text-lg font-semibold text-recipe-ink">Security</h2>
+          <p class="text-sm text-slate-600">Update your password regularly.</p>
+        </div>
+
+        <form class="mt-6 space-y-4" @submit.prevent="handlePasswordSave">
+          <div class="grid gap-4 sm:grid-cols-3">
+            <Input
+              v-model="passwordForm.currentPassword"
+              label="Current password"
+              name="currentPassword"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+            <Input
+              v-model="passwordForm.newPassword"
+              label="New password"
+              name="newPassword"
+              type="password"
+              autocomplete="new-password"
+              required
+            />
+            <Input
+              v-model="passwordForm.confirmPassword"
+              label="Confirm password"
+              name="confirmPassword"
+              type="password"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+
+          <p
+            v-if="passwordError"
+            class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+          >
+            {{ passwordError }}
+          </p>
+          <p
+            v-if="passwordSuccess"
+            class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
+          >
+            {{ passwordSuccess }}
+          </p>
+
+          <div class="flex justify-end">
+            <Button class="w-full sm:w-auto">Update password</Button>
+          </div>
+        </form>
       </div>
-
-      <form class="mt-6 space-y-4" @submit.prevent="handlePasswordSave">
-        <div class="grid gap-4 sm:grid-cols-3">
-          <Input
-            v-model="passwordForm.currentPassword"
-            label="Current password"
-            name="currentPassword"
-            type="password"
-            autocomplete="current-password"
-            required
-          />
-          <Input
-            v-model="passwordForm.newPassword"
-            label="New password"
-            name="newPassword"
-            type="password"
-            autocomplete="new-password"
-            required
-          />
-          <Input
-            v-model="passwordForm.confirmPassword"
-            label="Confirm password"
-            name="confirmPassword"
-            type="password"
-            autocomplete="new-password"
-            required
-          />
-        </div>
-
-        <p
-          v-if="passwordError"
-          class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
-        >
-          {{ passwordError }}
-        </p>
-        <p
-          v-if="passwordSuccess"
-          class="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700"
-        >
-          {{ passwordSuccess }}
-        </p>
-
-        <div class="flex justify-end">
-          <Button class="w-full sm:w-auto">Update password</Button>
-        </div>
-      </form>
     </div>
-  </section>
+  </div>
 </template>
