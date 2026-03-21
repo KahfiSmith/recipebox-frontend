@@ -7,6 +7,8 @@ import { isMinLength } from '@/shared/lib/validators'
 
 const props = defineProps<{
   entries: MealPlanEntry[]
+  isLoading?: boolean
+  errorMessage?: string
 }>()
 
 const emit = defineEmits<{
@@ -157,6 +159,20 @@ const handleSendIngredients = (entry: MealPlanEntry) => {
     <section class="rounded-2xl border border-recipe-sand-b10 bg-white p-6 shadow-sm">
       <h2 class="text-lg font-semibold text-recipe-ink">Planned meals</h2>
 
+      <p
+        v-if="props.errorMessage"
+        class="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+      >
+        {{ props.errorMessage }}
+      </p>
+
+      <p
+        v-if="props.isLoading"
+        class="mt-4 rounded-lg border border-recipe-sand-b10 bg-recipe-sand-w75 px-3 py-2 text-sm text-slate-600"
+      >
+        Syncing meal plans with database...
+      </p>
+
       <div v-if="entries.length" class="mt-4 space-y-3">
         <article
           v-for="entry in entries"
@@ -189,7 +205,9 @@ const handleSendIngredients = (entry: MealPlanEntry) => {
         </article>
       </div>
 
-      <p v-else class="mt-4 text-sm text-slate-500">No meal plans yet for this week.</p>
+      <p v-else-if="!props.isLoading" class="mt-4 text-sm text-slate-500">
+        No meal plans yet for this week.
+      </p>
     </section>
   </div>
 </template>

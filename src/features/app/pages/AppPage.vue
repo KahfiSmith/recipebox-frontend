@@ -8,6 +8,7 @@ import AppOverviewPanel from '@/features/app/components/AppOverviewPanel.vue'
 import AppRecipesPanel from '@/features/app/components/AppRecipesPanel.vue'
 import AppShoppingListPanel from '@/features/app/components/AppShoppingListPanel.vue'
 import { dashboardService } from '@/features/app/services/dashboardService'
+import { mealPlanService } from '@/features/app/services/mealPlanService'
 import { recipeService } from '@/features/app/services/recipeService'
 import type {
   AddIngredientsPayload,
@@ -44,7 +45,7 @@ const activeMenu = computed<DashboardMenuKey>(() => {
 
 const recipes = ref<RecipeItem[]>([])
 
-const mealPlanEntries = ref<MealPlanEntry[]>([
+const localMealPlanEntries = ref<MealPlanEntry[]>([
   {
     id: 'meal-1',
     day: 'Monday',
@@ -66,32 +67,11 @@ const shoppingItems = ref<ShoppingItem[]>([
   },
 ])
 
-const saveMealPlanEntry = (payload: MealPlanPayload) => {
-  if (payload.id) {
-    mealPlanEntries.value = mealPlanEntries.value.map((entry) =>
-      entry.id === payload.id
-        ? { ...entry, ...payload, id: payload.id, cooked: entry.cooked }
-        : entry,
-    )
-    return
-  }
-
-  mealPlanEntries.value.unshift({
-    id: crypto.randomUUID(),
-    ...payload,
-    cooked: false,
-  })
-}
-
-const deleteMealPlanEntry = (id: string) => {
-  mealPlanEntries.value = mealPlanEntries.value.filter((entry) => entry.id !== id)
-}
-
-const toggleMealCooked = (id: string) => {
-  mealPlanEntries.value = mealPlanEntries.value.map((entry) =>
-    entry.id === id ? { ...entry, cooked: !entry.cooked } : entry,
-  )
-}
+const remoteMealPlanEntries = ref<MealPlanEntry[]>([])
+const shouldUseRemoteMealPlans = computed(() =>
+  hasApiBaseUrl && sessionReady.value && isAuthenticated.value)
+const mealPlanEntries = computed(() =>
+  shouldUseRemoteMealPlans.value ? remoteMealPlanEntries.value : localMealPlanEntries.value)
 
 const addIngredientsToShopping = (payload: AddIngredientsPayload) => {
   payload.ingredients.forEach((ingredient) => {
@@ -180,6 +160,14 @@ const recipesQuery = useQuery({
     && activeMenu.value === 'recipes'),
 })
 
+const mealPlansQuery = useQuery({
+  queryKey: ['meal-plans', 20, 0],
+  queryFn: () => mealPlanService.getMealPlans({ limit: 20, offset: 0 }),
+  enabled: computed(() =>
+    shouldUseRemoteMealPlans.value
+    && (activeMenu.value === 'meal-planner' || activeMenu.value === 'shopping-list')),
+})
+
 const saveRecipeMutation = useMutation({
   mutationFn: async (payload: RecipePayload) => {
     if (payload.id) {
@@ -206,11 +194,46 @@ const deleteRecipeMutation = useMutation({
   },
 })
 
+const saveMealPlanMutation = useMutation({
+  mutationFn: async (payload: MealPlanPayload) => {
+    if (payload.id) {
+      return mealPlanService.updateMealPlan(payload.id, payload)
+    }
+
+    return mealPlanService.createMealPlan(payload)
+  },
+  onSuccess: async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['meal-plans'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard-overview'] }),
+    ])
+  },
+})
+
+const deleteMealPlanMutation = useMutation({
+  mutationFn: (id: string) => mealPlanService.deleteMealPlan(id),
+  onSuccess: async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['meal-plans'] }),
+      queryClient.invalidateQueries({ queryKey: ['dashboard-overview'] }),
+    ])
+  },
+})
+
 watch(
   () => recipesQuery.data.value,
   (data) => {
     if (!data) return
     recipes.value = data.items
+  },
+  { immediate: true },
+)
+
+watch(
+  () => mealPlansQuery.data.value,
+  (data) => {
+    if (!data) return
+    remoteMealPlanEntries.value = data.items
   },
   { immediate: true },
 )
@@ -229,6 +252,14 @@ const recipeErrorMessage = computed(() =>
       : deleteRecipeMutation.error.value instanceof Error
         ? deleteRecipeMutation.error.value.message
         : '')
+const mealPlanErrorMessage = computed(() =>
+  mealPlansQuery.error.value instanceof Error
+    ? mealPlansQuery.error.value.message
+    : saveMealPlanMutation.error.value instanceof Error
+      ? saveMealPlanMutation.error.value.message
+      : deleteMealPlanMutation.error.value instanceof Error
+        ? deleteMealPlanMutation.error.value.message
+        : '')
 
 const saveRecipe = async (payload: RecipePayload) => {
   await saveRecipeMutation.mutateAsync(payload)
@@ -236,6 +267,65 @@ const saveRecipe = async (payload: RecipePayload) => {
 
 const deleteRecipe = async (id: string) => {
   await deleteRecipeMutation.mutateAsync(id)
+}
+
+const saveMealPlanEntry = async (payload: MealPlanPayload) => {
+  if (!shouldUseRemoteMealPlans.value) {
+    if (payload.id) {
+      localMealPlanEntries.value = localMealPlanEntries.value.map((entry) =>
+        entry.id === payload.id
+          ? { ...entry, ...payload, id: payload.id, cooked: entry.cooked }
+          : entry,
+      )
+      return
+    }
+
+    localMealPlanEntries.value.unshift({
+      id: crypto.randomUUID(),
+      ...payload,
+      cooked: false,
+    })
+    return
+  }
+
+  const currentEntry = payload.id
+    ? mealPlanEntries.value.find((entry) => entry.id === payload.id)
+    : null
+
+  await saveMealPlanMutation.mutateAsync({
+    ...payload,
+    cooked: payload.cooked ?? currentEntry?.cooked ?? false,
+  })
+}
+
+const deleteMealPlanEntry = async (id: string) => {
+  if (!shouldUseRemoteMealPlans.value) {
+    localMealPlanEntries.value = localMealPlanEntries.value.filter((entry) => entry.id !== id)
+    return
+  }
+
+  await deleteMealPlanMutation.mutateAsync(id)
+}
+
+const toggleMealCooked = async (id: string) => {
+  if (!shouldUseRemoteMealPlans.value) {
+    localMealPlanEntries.value = localMealPlanEntries.value.map((entry) =>
+      entry.id === id ? { ...entry, cooked: !entry.cooked } : entry,
+    )
+    return
+  }
+
+  const entry = mealPlanEntries.value.find((item) => item.id === id)
+  if (!entry) return
+
+  await saveMealPlanMutation.mutateAsync({
+    id: entry.id,
+    day: entry.day,
+    mealName: entry.mealName,
+    servings: entry.servings,
+    ingredients: entry.ingredients,
+    cooked: !entry.cooked,
+  })
 }
 </script>
 
@@ -257,6 +347,8 @@ const deleteRecipe = async (id: string) => {
   <AppMealPlannerPanel
     v-else-if="activeMenu === 'meal-planner'"
     :entries="mealPlanEntries"
+    :is-loading="mealPlansQuery.isPending.value || saveMealPlanMutation.isPending.value || deleteMealPlanMutation.isPending.value"
+    :error-message="mealPlanErrorMessage"
     @save-entry="saveMealPlanEntry"
     @delete-entry="deleteMealPlanEntry"
     @toggle-cooked="toggleMealCooked"
