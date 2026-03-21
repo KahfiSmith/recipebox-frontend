@@ -48,6 +48,7 @@ export interface MealPlanPayload {
   mealName: string
   servings: number
   ingredients: string[]
+  cooked?: boolean
 }
 
 export interface AddIngredientsPayload {
