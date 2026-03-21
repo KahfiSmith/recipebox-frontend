@@ -60,11 +60,11 @@ Implikasinya:
   - `POST /api/v1/recipes`
   - `PUT /api/v1/recipes/{id}`
   - `DELETE /api/v1/recipes/{id}`
-- Belum dipakai frontend dan masih menjadi target kontrak backend:
   - `GET /api/v1/meal-plans`
   - `POST /api/v1/meal-plans`
   - `PUT /api/v1/meal-plans/{id}`
   - `DELETE /api/v1/meal-plans/{id}`
+- Belum dipakai frontend dan masih menjadi target kontrak backend:
   - `GET /api/v1/shopping-items`
   - `POST /api/v1/shopping-items`
   - `PUT /api/v1/shopping-items/{id}`
@@ -128,3 +128,28 @@ Normalisasi response yang saat ini didukung frontend:
   - `name`
   - `category`
   - salah satu dari `prepTime`, `prepTimeMinutes`, atau `prep_time_minutes`
+
+## Meal Plan Response Notes
+
+- Frontend menerima response list meal plan dalam beberapa bentuk berikut:
+  - `data` berupa array meal plan langsung
+  - `data.mealPlans` + metadata pagination opsional
+  - `data.items` + metadata pagination opsional
+  - bentuk top-level setara tanpa wrapper `data`
+- Frontend menerima response create/update meal plan dalam beberapa bentuk berikut:
+  - `data` langsung berisi meal plan
+  - `data.mealPlan`
+  - meal plan langsung di top-level
+- Field meal plan minimum yang dipakai frontend:
+  - `id`
+  - `day`
+  - salah satu dari `mealName`, `meal_name`, `name`, atau `title`
+  - salah satu dari `servings`, `servingCount`, atau `serving_count`
+  - salah satu dari `ingredients`, `ingredientNames`, atau `ingredient_names`
+  - salah satu dari `cooked`, `isCooked`, atau `is_cooked`
+- Frontend saat ini mengirim payload create/update meal plan dalam bentuk:
+  - `day`
+  - `mealName`
+  - `servings`
+  - `ingredients`
+  - `cooked`

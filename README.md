@@ -18,8 +18,8 @@ Frontend untuk aplikasi Recipebox berbasis Vue 3 + Vite + TypeScript dengan stru
 - Saat `VITE_API_BASE_URL` tersedia, session auth mencoba dipulihkan lewat `/auth/refresh` lalu `/auth/me`.
 - Saat `VITE_API_BASE_URL` kosong, login memakai mock session aman dan form auth lain mengembalikan mock success response agar flow development tetap usable.
 - Route guard aktif untuk `requiresAuth` dan `guestOnly`.
-- Workspace `/app` memakai backend untuk overview summary (`GET /dashboard`) dan recipes (`GET/POST/PUT/DELETE /recipes`) saat API tersedia.
-- Panel meal planner dan shopping list di `/app` masih memakai state lokal/in-memory; ingredient dari meal plan bisa dikirim ke shopping list dari UI.
+- Workspace `/app` memakai backend untuk overview summary (`GET /dashboard`), recipes (`GET/POST/PUT/DELETE /recipes`), dan meal plans (`GET/POST/PUT/DELETE /meal-plans`) saat API tersedia.
+- Panel shopping list di `/app` masih memakai state lokal/in-memory; ingredient dari meal plan bisa dikirim ke shopping list dari UI.
 - Halaman `/app/profile` dilindungi auth guard, tetapi penyimpanan profile/preferences/password masih client-side saja.
 
 ## Prasyarat
@@ -89,7 +89,7 @@ pnpm format     # prettier untuk src/
 │  │  ├─ app/
 │  │  │  ├─ components/            # panel overview, recipes, meal planner, shopping list
 │  │  │  ├─ layouts/
-│  │  │  ├─ services/              # dashboardService, recipeService
+│  │  │  ├─ services/              # dashboardService, recipeService, mealPlanService
 │  │  │  ├─ constants/
 │  │  │  ├─ types.ts
 │  │  │  └─ pages/AppPage.vue
@@ -112,7 +112,7 @@ pnpm format     # prettier untuk src/
 │     ├─ composables/              # hooks reusable (mis. auth)
 │     ├─ constants/
 │     ├─ lib/                      # helper (utils, validators)
-│     ├─ schemas/                  # schema Zod untuk auth/dashboard/recipe
+│     ├─ schemas/                  # schema Zod untuk auth/dashboard/recipe/meal plan
 │     ├─ services/
 │     │  ├─ api/index.ts           # definisi endpoint
 │     │  └─ httpClient.ts          # wrapper fetch + query + error handling
@@ -131,11 +131,11 @@ pnpm format     # prettier untuk src/
 
 - Routing: rute didefinisikan di `src/app/router/routes.ts` dan guard di `src/app/router/guards.ts` (redirect login dan update `document.title`).
 - HTTP client: `src/shared/services/httpClient.ts` menggunakan `fetch`, `credentials: include`, dan bearer access token in-memory dari auth store.
-- Server-state UI: TanStack Query di-bootstrap dari `src/app/queryClient.ts` dan dipakai untuk query overview/recipes serta mutation auth dan recipe yang memanggil backend.
+- Server-state UI: TanStack Query di-bootstrap dari `src/app/queryClient.ts` dan dipakai untuk query overview/recipes/meal plans serta mutation auth, recipe, dan meal plan yang memanggil backend.
 - Auth service: `src/features/auth/services/authService.ts` mengikuti endpoint auth di `docs/api.md`, memvalidasi payload/response auth dengan Zod, dan punya fallback mock untuk development saat API base URL belum di-set.
 - Dashboard service: `src/features/app/services/dashboardService.ts` memanggil `GET /api/v1/dashboard` dan memvalidasi shape response summary dengan Zod sebelum dipakai di overview.
 - Recipe service: `src/features/app/services/recipeService.ts` memanggil `GET/POST/PUT/DELETE /api/v1/recipes`, memvalidasi payload/response recipe dengan Zod, dan dipakai oleh TanStack Query di panel recipes.
-- Meal planner dan shopping list saat ini masih dimodelkan di state lokal `AppPage.vue`, belum memakai endpoint `meal-plans` dan `shopping-items`.
+- Meal planner memakai `mealPlanService` + TanStack Query saat API tersedia, dengan fallback state lokal saat `VITE_API_BASE_URL` kosong; shopping list masih dimodelkan di state lokal `AppPage.vue` dan belum memakai endpoint `shopping-items`.
 - Alias import: `@` mengarah ke `src/` (lihat `vite.config.ts`).
 
 ## Troubleshooting
