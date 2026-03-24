@@ -21,7 +21,7 @@ export const apiEndpoints = {
     recipeById: (id: string) => `${API_PREFIX}/recipes/${id}`,
     mealPlans: `${API_PREFIX}/meal-plans`,
     mealPlanById: (id: string) => `${API_PREFIX}/meal-plans/${id}`,
-    shoppingItems: `${API_PREFIX}/shopping-items`,
-    shoppingItemById: (id: string) => `${API_PREFIX}/shopping-items/${id}`,
+    shoppingLists: `${API_PREFIX}/shopping-items`,
+    shoppingListById: (id: string) => `${API_PREFIX}/shopping-items/${id}`,
   },
 }
