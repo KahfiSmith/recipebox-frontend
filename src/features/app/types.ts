@@ -69,5 +69,7 @@ export interface ShoppingPayload {
   id?: string
   name: string
   qty: string
+  checked?: boolean
+  source?: 'manual' | 'meal-plan'
   sourceLabel?: string
 }

@@ -10,6 +10,7 @@ import AppShoppingListPanel from '@/features/app/components/AppShoppingListPanel
 import { dashboardService } from '@/features/app/services/dashboardService'
 import { mealPlanService } from '@/features/app/services/mealPlanService'
 import { recipeService } from '@/features/app/services/recipeService'
+import { shoppingListService } from '@/features/app/services/shoopingListService'
 import type {
   AddIngredientsPayload,
   DashboardMenuKey,
@@ -56,7 +57,7 @@ const localMealPlanEntries = ref<MealPlanEntry[]>([
   },
 ])
 
-const shoppingItems = ref<ShoppingItem[]>([
+const localShoppingItems = ref<ShoppingItem[]>([
   {
     id: 'shop-1',
     name: 'Rice',
@@ -68,62 +69,177 @@ const shoppingItems = ref<ShoppingItem[]>([
 ])
 
 const remoteMealPlanEntries = ref<MealPlanEntry[]>([])
+const remoteShoppingItems = ref<ShoppingItem[]>([])
 const shouldUseRemoteMealPlans = computed(() =>
+  hasApiBaseUrl && sessionReady.value && isAuthenticated.value)
+const shouldUseRemoteShoppingItems = computed(() =>
   hasApiBaseUrl && sessionReady.value && isAuthenticated.value)
 const mealPlanEntries = computed(() =>
   shouldUseRemoteMealPlans.value ? remoteMealPlanEntries.value : localMealPlanEntries.value)
+const shoppingItems = computed(() =>
+  shouldUseRemoteShoppingItems.value ? remoteShoppingItems.value : localShoppingItems.value)
+const shoppingActionError = ref('')
 
-const addIngredientsToShopping = (payload: AddIngredientsPayload) => {
-  payload.ingredients.forEach((ingredient) => {
-    const normalized = ingredient.trim().toLowerCase()
-    if (!normalized) return
-
-    const existing = shoppingItems.value.find((item) => item.name.toLowerCase() === normalized)
-    if (existing) return
-
-    shoppingItems.value.unshift({
-      id: crypto.randomUUID(),
-      name: ingredient.trim(),
-      qty: '1 item',
-      checked: false,
-      source: 'meal-plan',
-      sourceLabel: payload.mealName,
-    })
-  })
+const invalidateShoppingQueries = async () => {
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: ['shopping-items'] }),
+    queryClient.invalidateQueries({ queryKey: ['dashboard-overview'] }),
+  ])
 }
 
-const saveShoppingItem = (payload: ShoppingPayload) => {
+const addIngredientsToShopping = async (payload: AddIngredientsPayload) => {
+  shoppingActionError.value = ''
+
+  const existingNames = new Set(
+    shoppingItems.value.map((item) => item.name.trim().toLowerCase()),
+  )
+
+  const itemsToCreate = payload.ingredients
+    .map((ingredient) => ingredient.trim())
+    .filter((ingredient) => {
+      const normalized = ingredient.toLowerCase()
+
+      if (!normalized || existingNames.has(normalized)) {
+        return false
+      }
+
+      existingNames.add(normalized)
+      return true
+    })
+
+  if (!itemsToCreate.length) {
+    return
+  }
+
+  if (!shouldUseRemoteShoppingItems.value) {
+    itemsToCreate.forEach((ingredient) => {
+      localShoppingItems.value.unshift({
+        id: crypto.randomUUID(),
+        name: ingredient,
+        qty: '1 item',
+        checked: false,
+        source: 'meal-plan',
+        sourceLabel: payload.mealName,
+      })
+    })
+    return
+  }
+
+  try {
+    await Promise.all(itemsToCreate.map((ingredient) =>
+      shoppingListService.createShoppingListItem({
+        name: ingredient,
+        qty: '1 item',
+        checked: false,
+        source: 'meal-plan',
+        sourceLabel: payload.mealName,
+      })))
+    await invalidateShoppingQueries()
+  } catch (error) {
+    shoppingActionError.value = error instanceof Error
+      ? error.message
+      : 'Failed to add meal ingredients to shopping list.'
+  }
+}
+
+const saveShoppingItem = async (payload: ShoppingPayload) => {
+  shoppingActionError.value = ''
+
+  const currentItem = payload.id
+    ? shoppingItems.value.find((item) => item.id === payload.id)
+    : null
+  const normalizedPayload: ShoppingPayload = {
+    ...payload,
+    checked: payload.checked ?? currentItem?.checked ?? false,
+    source: payload.source ?? currentItem?.source ?? 'manual',
+    sourceLabel: payload.sourceLabel ?? currentItem?.sourceLabel ?? 'General',
+  }
+
+  if (shouldUseRemoteShoppingItems.value) {
+    await saveShoppingItemMutation.mutateAsync(normalizedPayload)
+    return
+  }
+
   if (payload.id) {
-    shoppingItems.value = shoppingItems.value.map((item) =>
+    localShoppingItems.value = localShoppingItems.value.map((item) =>
       item.id === payload.id
-        ? { ...item, name: payload.name, qty: payload.qty, sourceLabel: payload.sourceLabel }
+        ? {
+            ...item,
+            name: normalizedPayload.name,
+            qty: normalizedPayload.qty,
+            checked: normalizedPayload.checked ?? item.checked,
+            source: normalizedPayload.source ?? item.source,
+            sourceLabel: normalizedPayload.sourceLabel,
+          }
         : item,
     )
     return
   }
 
-  shoppingItems.value.unshift({
+  localShoppingItems.value.unshift({
     id: crypto.randomUUID(),
-    name: payload.name,
-    qty: payload.qty,
-    checked: false,
-    source: 'manual',
-    sourceLabel: payload.sourceLabel || 'General',
+    name: normalizedPayload.name,
+    qty: normalizedPayload.qty,
+    checked: normalizedPayload.checked ?? false,
+    source: normalizedPayload.source ?? 'manual',
+    sourceLabel: normalizedPayload.sourceLabel || 'General',
   })
 }
 
-const deleteShoppingItem = (id: string) => {
-  shoppingItems.value = shoppingItems.value.filter((item) => item.id !== id)
+const deleteShoppingItem = async (id: string) => {
+  shoppingActionError.value = ''
+
+  if (shouldUseRemoteShoppingItems.value) {
+    await deleteShoppingItemMutation.mutateAsync(id)
+    return
+  }
+
+  localShoppingItems.value = localShoppingItems.value.filter((item) => item.id !== id)
 }
 
-const toggleShoppingItem = (id: string) => {
-  shoppingItems.value = shoppingItems.value.map((item) =>
-    item.id === id ? { ...item, checked: !item.checked } : item,
+const toggleShoppingItem = async (id: string) => {
+  shoppingActionError.value = ''
+
+  const item = shoppingItems.value.find((entry) => entry.id === id)
+  if (!item) return
+
+  if (shouldUseRemoteShoppingItems.value) {
+    await saveShoppingItemMutation.mutateAsync({
+      id: item.id,
+      name: item.name,
+      qty: item.qty,
+      checked: !item.checked,
+      source: item.source,
+      sourceLabel: item.sourceLabel,
+    })
+    return
+  }
+
+  localShoppingItems.value = localShoppingItems.value.map((entry) =>
+    entry.id === id ? { ...entry, checked: !entry.checked } : entry,
   )
 }
 
-const clearCheckedShoppingItems = () => {
-  shoppingItems.value = shoppingItems.value.filter((item) => !item.checked)
+const clearCheckedShoppingItems = async () => {
+  shoppingActionError.value = ''
+
+  if (!shouldUseRemoteShoppingItems.value) {
+    localShoppingItems.value = localShoppingItems.value.filter((item) => !item.checked)
+    return
+  }
+
+  const checkedItems = shoppingItems.value.filter((item) => item.checked)
+  if (!checkedItems.length) return
+
+  try {
+    await Promise.all(checkedItems.map((item) =>
+      shoppingListService.deleteShoppingListItem(item.id)))
+    await invalidateShoppingQueries()
+  } catch (error) {
+    shoppingActionError.value = error instanceof Error
+      ? error.message
+      : 'Failed to clear checked shopping items.'
+  }
 }
 
 const shoppingMenuOptions = computed(() => {
@@ -165,6 +281,14 @@ const mealPlansQuery = useQuery({
   queryFn: () => mealPlanService.getMealPlans({ limit: 20, offset: 0 }),
   enabled: computed(() =>
     shouldUseRemoteMealPlans.value
+    && (activeMenu.value === 'meal-planner' || activeMenu.value === 'shopping-list')),
+})
+
+const shoppingItemsQuery = useQuery({
+  queryKey: ['shopping-items', 20, 0],
+  queryFn: () => shoppingListService.getShoppingList({ limit: 20, offset: 0 }),
+  enabled: computed(() =>
+    shouldUseRemoteShoppingItems.value
     && (activeMenu.value === 'meal-planner' || activeMenu.value === 'shopping-list')),
 })
 
@@ -220,6 +344,24 @@ const deleteMealPlanMutation = useMutation({
   },
 })
 
+const saveShoppingItemMutation = useMutation({
+  mutationFn: async (payload: ShoppingPayload) => {
+    const { id, ...requestPayload } = payload
+
+    if (id) {
+      return shoppingListService.updateShoppingListItem(id, requestPayload)
+    }
+
+    return shoppingListService.createShoppingListItem(requestPayload)
+  },
+  onSuccess: invalidateShoppingQueries,
+})
+
+const deleteShoppingItemMutation = useMutation({
+  mutationFn: (id: string) => shoppingListService.deleteShoppingListItem(id),
+  onSuccess: invalidateShoppingQueries,
+})
+
 watch(
   () => recipesQuery.data.value,
   (data) => {
@@ -234,6 +376,15 @@ watch(
   (data) => {
     if (!data) return
     remoteMealPlanEntries.value = data.items
+  },
+  { immediate: true },
+)
+
+watch(
+  () => shoppingItemsQuery.data.value,
+  (data) => {
+    if (!data) return
+    remoteShoppingItems.value = data.items
   },
   { immediate: true },
 )
@@ -260,6 +411,14 @@ const mealPlanErrorMessage = computed(() =>
       : deleteMealPlanMutation.error.value instanceof Error
         ? deleteMealPlanMutation.error.value.message
         : '')
+const shoppingErrorMessage = computed(() =>
+  shoppingItemsQuery.error.value instanceof Error
+    ? shoppingItemsQuery.error.value.message
+    : saveShoppingItemMutation.error.value instanceof Error
+      ? saveShoppingItemMutation.error.value.message
+      : deleteShoppingItemMutation.error.value instanceof Error
+        ? deleteShoppingItemMutation.error.value.message
+        : shoppingActionError.value)
 
 const saveRecipe = async (payload: RecipePayload) => {
   await saveRecipeMutation.mutateAsync(payload)
@@ -357,7 +516,9 @@ const toggleMealCooked = async (id: string) => {
   <AppShoppingListPanel
     v-else
     :items="shoppingItems"
+    :is-loading="shoppingItemsQuery.isPending.value || saveShoppingItemMutation.isPending.value || deleteShoppingItemMutation.isPending.value"
     :menu-options="shoppingMenuOptions"
+    :error-message="shoppingErrorMessage"
     @save-item="saveShoppingItem"
     @delete-item="deleteShoppingItem"
     @toggle-item="toggleShoppingItem"
