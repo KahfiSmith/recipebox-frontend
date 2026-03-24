@@ -64,11 +64,12 @@ Implikasinya:
   - `POST /api/v1/meal-plans`
   - `PUT /api/v1/meal-plans/{id}`
   - `DELETE /api/v1/meal-plans/{id}`
-- Belum dipakai frontend dan masih menjadi target kontrak backend:
   - `GET /api/v1/shopping-items`
   - `POST /api/v1/shopping-items`
   - `PUT /api/v1/shopping-items/{id}`
   - `DELETE /api/v1/shopping-items/{id}`
+- Belum dipakai frontend dan masih menjadi target kontrak backend:
+  - Tidak ada pada kelompok endpoint utama saat ini.
 
 ## Pagination
 - List endpoints support query params:
@@ -153,3 +154,30 @@ Normalisasi response yang saat ini didukung frontend:
   - `servings`
   - `ingredients`
   - `cooked`
+
+## Shopping List Response Notes
+
+- Frontend menerima response list shopping list dalam beberapa bentuk berikut:
+  - `data` berupa array shopping item langsung
+  - `data.shoppingItems` + metadata pagination opsional
+  - `data.shoppingLists` + metadata pagination opsional
+  - `data.items` + metadata pagination opsional
+  - bentuk top-level setara tanpa wrapper `data`
+- Frontend menerima response create/update shopping item dalam beberapa bentuk berikut:
+  - `data` langsung berisi shopping item
+  - `data.shoppingItem`
+  - `data.shoppingList`
+  - shopping item langsung di top-level
+- Field shopping item minimum yang dipakai frontend:
+  - `id`
+  - salah satu dari `name`, `itemName`, `item_name`, atau `title`
+  - salah satu dari `qty`, `quantity`, atau `amount`
+  - opsional salah satu dari `checked`, `isChecked`, atau `is_checked`
+  - opsional salah satu dari `source`, `sourceType`, atau `source_type`
+  - opsional salah satu dari `sourceLabel`, `source_label`, `group`, `groupName`, `group_name`, `menuName`, atau `menu_name`
+- Frontend saat ini mengirim payload create/update shopping item dalam bentuk:
+  - `name`
+  - `qty`
+  - `checked`
+  - `source`
+  - `sourceLabel`
