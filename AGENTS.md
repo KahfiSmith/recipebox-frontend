@@ -9,7 +9,7 @@ Fokus saat ini:
 
 - Landing page marketing di `/`
 - Auth flow dasar di `/auth/*`, dengan login/register/forgot password/verify email/reset password sudah terhubung ke `authService`
-- Workspace `/app` berisi panel overview, recipes, meal planner, dan shopping list; overview, recipes, meal planner, dan shopping list sudah bisa terhubung ke backend saat API tersedia, dengan fallback lokal untuk meal planner dan shopping list saat API base URL kosong
+- Workspace `/app` berisi panel overview, recipes, meal planner, dan shopping list; overview, recipes, meal planner, dan shopping list sudah bisa terhubung ke backend saat API tersedia, dengan meal planner bersumber dari backend saja dan shopping list tetap punya fallback lokal saat API base URL kosong
 - Profile page terproteksi di `/app/profile`
 
 ## 2. Tech Stack & Tools
@@ -63,6 +63,7 @@ Aturan penempatan:
 - Semua request jaringan gunakan `apiClient` (`src/shared/services/httpClient.ts`).
 - Query/mutation untuk request backend gunakan TanStack Query di level komponen/composable; jangan memindahkan source of truth session auth dari Pinia tanpa tugas eksplisit.
 - Endpoint API didefinisikan terpusat di `src/shared/services/api/index.ts`.
+- Meal planner di `/app` harus menampilkan data dari backend/database saja; jika `VITE_API_BASE_URL` atau session belum tersedia, tampilkan state kosong/disabled dan jangan fallback ke state lokal.
 - Flow auth frontend saat ini sudah mencakup `register`, `login`, `verify-email/request`, `verify-email/confirm`, `password/forgot`, `password/reset`, `refresh`, `logout`, dan `me` pada layer service.
 - Saat `VITE_API_BASE_URL` kosong, flow auth development tetap harus usable lewat mock response yang aman untuk login dan mock success message untuk form auth lain.
 - Store auth saat ini menyimpan access token di memori Pinia dan mencoba restore session via `/auth/refresh` + `/auth/me` ketika API tersedia; jangan menambah persistence tambahan tanpa tugas yang eksplisit.
@@ -131,5 +132,5 @@ Contoh:
 1. `/` sudah berfungsi sebagai landing page marketing dengan section `#features`, `#how-it-works`, dan `#preview`.
 2. `/auth/login` memakai `authService.login()`, guard menunggu `initializeSession()`, dan session mencoba dipulihkan via `/auth/refresh` + `/auth/me` saat API tersedia.
 3. `/auth/register`, `/auth/forgot-password`, `/auth/verify-email`, dan `/auth/reset-password` sudah memanggil endpoint auth terkait melalui `authService`.
-4. `/app` memakai backend untuk summary overview, recipes, meal planner, dan shopping list saat API tersedia; meal planner dan shopping list tetap punya fallback state lokal saat API base URL kosong.
+4. `/app` memakai backend untuk summary overview, recipes, meal planner, dan shopping list saat API tersedia; meal planner hanya menampilkan data backend/database, sedangkan shopping list tetap punya fallback state lokal saat API base URL kosong.
 5. `/app/profile` dilindungi `requiresAuth` dan saat ini masih berbasis form client-side tanpa persist ke backend.

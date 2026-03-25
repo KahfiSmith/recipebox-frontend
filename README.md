@@ -19,7 +19,8 @@ Frontend untuk aplikasi Recipebox berbasis Vue 3 + Vite + TypeScript dengan stru
 - Saat `VITE_API_BASE_URL` kosong, login memakai mock session aman dan form auth lain mengembalikan mock success response agar flow development tetap usable.
 - Route guard aktif untuk `requiresAuth` dan `guestOnly`.
 - Workspace `/app` memakai backend untuk overview summary (`GET /dashboard`), recipes (`GET/POST/PUT/DELETE /recipes`), meal plans (`GET/POST/PUT/DELETE /meal-plans`), dan shopping list (`GET/POST/PUT/DELETE /shopping-items`) saat API tersedia.
-- Saat `VITE_API_BASE_URL` kosong, meal planner dan shopping list tetap usable lewat fallback state lokal; ingredient dari meal plan tetap bisa dikirim ke shopping list dari UI.
+- Meal planner hanya menampilkan data hasil query backend/database; saat API atau session belum tersedia, panel tetap kosong dan tidak fallback ke state lokal.
+- Saat `VITE_API_BASE_URL` kosong, shopping list tetap usable lewat fallback state lokal.
 - Halaman `/app/profile` dilindungi auth guard, tetapi penyimpanan profile/preferences/password masih client-side saja.
 
 ## Prasyarat
@@ -135,7 +136,8 @@ pnpm format     # prettier untuk src/
 - Auth service: `src/features/auth/services/authService.ts` mengikuti endpoint auth di `docs/api.md`, memvalidasi payload/response auth dengan Zod, dan punya fallback mock untuk development saat API base URL belum di-set.
 - Dashboard service: `src/features/app/services/dashboardService.ts` memanggil `GET /api/v1/dashboard` dan memvalidasi shape response summary dengan Zod sebelum dipakai di overview.
 - Recipe service: `src/features/app/services/recipeService.ts` memanggil `GET/POST/PUT/DELETE /api/v1/recipes`, memvalidasi payload/response recipe dengan Zod, dan dipakai oleh TanStack Query di panel recipes.
-- Meal planner dan shopping list memakai service + TanStack Query saat API tersedia, dengan fallback state lokal saat `VITE_API_BASE_URL` kosong.
+- Meal planner memakai service + TanStack Query sebagai source of truth tunggal dari backend/database.
+- Shopping list memakai service + TanStack Query saat API tersedia, dengan fallback state lokal saat `VITE_API_BASE_URL` kosong.
 - Alias import: `@` mengarah ke `src/` (lihat `vite.config.ts`).
 
 ## Troubleshooting
