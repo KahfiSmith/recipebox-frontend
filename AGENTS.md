@@ -66,7 +66,7 @@ Aturan penempatan:
 - Meal planner di `/app` harus menampilkan data dari backend/database saja; jika `VITE_API_BASE_URL` atau session belum tersedia, tampilkan state kosong/disabled dan jangan fallback ke state lokal.
 - Flow auth frontend saat ini sudah mencakup `register`, `login`, `verify-email/request`, `verify-email/confirm`, `password/forgot`, `password/reset`, `refresh`, `logout`, dan `me` pada layer service.
 - Saat `VITE_API_BASE_URL` kosong, flow auth development tetap harus usable lewat mock response yang aman untuk login dan mock success message untuk form auth lain.
-- Store auth saat ini menyimpan access token di memori Pinia dan mencoba restore session via `/auth/refresh` + `/auth/me` ketika API tersedia; jangan menambah persistence tambahan tanpa tugas yang eksplisit.
+- Store auth saat ini memulihkan snapshot session tab aktif dari `sessionStorage`, menyimpan access token di state Pinia saat runtime, dan mencoba restore/sinkronisasi session via `/auth/refresh` + `/auth/me` ketika API tersedia; untuk persistence tambahan di luar kebutuhan reload tab, lakukan hanya dengan tugas yang eksplisit.
 - Untuk auth payload/response yang datang dari atau dikirim ke backend, validasi di boundary service dengan Zod sebelum data dipakai lebih jauh.
 - Saat mengimplementasikan auth flow baru, gunakan `docs/api.md` sebagai target kontrak backend, tetapi bedakan dengan jelas antara contract target dan status implementasi frontend saat ini.
 - Untuk endpoint list (`recipes`, `meal-plans`, `shopping-items`), ikuti contract pagination yang terdokumentasi di `docs/api.md`.
@@ -130,7 +130,7 @@ Contoh:
 ## 10. Snapshot Repo Saat Ini
 
 1. `/` sudah berfungsi sebagai landing page marketing dengan section `#features`, `#how-it-works`, dan `#preview`.
-2. `/auth/login` memakai `authService.login()`, guard menunggu `initializeSession()`, dan session mencoba dipulihkan via `/auth/refresh` + `/auth/me` saat API tersedia.
+2. `/auth/login` memakai `authService.login()`, guard menunggu `initializeSession()`, dan session dipulihkan dari `sessionStorage` pada refresh tab lalu disinkronkan via `/auth/refresh` + `/auth/me` saat API tersedia.
 3. `/auth/register`, `/auth/forgot-password`, `/auth/verify-email`, dan `/auth/reset-password` sudah memanggil endpoint auth terkait melalui `authService`.
 4. `/app` memakai backend untuk summary overview, recipes, meal planner, dan shopping list saat API tersedia; meal planner hanya menampilkan data backend/database, sedangkan shopping list tetap punya fallback state lokal saat API base URL kosong.
 5. `/app/profile` dilindungi `requiresAuth` dan saat ini masih berbasis form client-side tanpa persist ke backend.

@@ -15,7 +15,7 @@ Frontend untuk aplikasi Recipebox berbasis Vue 3 + Vite + TypeScript dengan stru
 - Landing page `/` sudah berisi section Hero, Features, How it works, Preview, Benefits, CTA, dan Footer.
 - Auth flow sudah terhubung ke `authService`: `login`, `register`, `verify-email/request`, `verify-email/confirm`, `password/forgot`, `password/reset`, `refresh`, `logout`, dan `me`.
 - Form auth memakai TanStack Query mutation untuk lifecycle request, sementara state session/auth tetap bersumber dari Pinia.
-- Saat `VITE_API_BASE_URL` tersedia, session auth mencoba dipulihkan lewat `/auth/refresh` lalu `/auth/me`.
+- Saat `VITE_API_BASE_URL` tersedia, session auth mencoba dipulihkan dari snapshot `sessionStorage` pada tab aktif lalu disinkronkan lewat `/auth/refresh` dan `/auth/me`.
 - Saat `VITE_API_BASE_URL` kosong, login memakai mock session aman dan form auth lain mengembalikan mock success response agar flow development tetap usable.
 - Route guard aktif untuk `requiresAuth` dan `guestOnly`.
 - Workspace `/app` memakai backend untuk overview summary (`GET /dashboard`), recipes (`GET/POST/PUT/DELETE /recipes`), meal plans (`GET/POST/PUT/DELETE /meal-plans`), dan shopping list (`GET/POST/PUT/DELETE /shopping-items`) saat API tersedia.
@@ -134,6 +134,7 @@ pnpm format     # prettier untuk src/
 - HTTP client: `src/shared/services/httpClient.ts` menggunakan `fetch`, `credentials: include`, dan bearer access token in-memory dari auth store.
 - Server-state UI: TanStack Query di-bootstrap dari `src/app/queryClient.ts` dan dipakai untuk query overview/recipes/meal plans serta mutation auth, recipe, dan meal plan yang memanggil backend.
 - Auth service: `src/features/auth/services/authService.ts` mengikuti endpoint auth di `docs/api.md`, memvalidasi payload/response auth dengan Zod, dan punya fallback mock untuk development saat API base URL belum di-set.
+- Auth store: `src/features/auth/stores/authStore.ts` menyimpan snapshot session tab aktif di `sessionStorage` untuk mempertahankan login saat browser refresh, lalu tetap mencoba sinkronisasi ke backend lewat `/auth/refresh` dan `/auth/me`.
 - Dashboard service: `src/features/app/services/dashboardService.ts` memanggil `GET /api/v1/dashboard` dan memvalidasi shape response summary dengan Zod sebelum dipakai di overview.
 - Recipe service: `src/features/app/services/recipeService.ts` memanggil `GET/POST/PUT/DELETE /api/v1/recipes`, memvalidasi payload/response recipe dengan Zod, dan dipakai oleh TanStack Query di panel recipes.
 - Meal planner memakai service + TanStack Query sebagai source of truth tunggal dari backend/database.
