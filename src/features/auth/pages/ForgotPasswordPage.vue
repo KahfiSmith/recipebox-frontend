@@ -9,7 +9,7 @@ import ForgotPasswordForm from '@/features/auth/components/ForgotPasswordForm.vu
         Authentication
       </p>
       <h1 class="text-2xl font-semibold text-recipe-ink">Forgot your password?</h1>
-      <p class="text-sm text-slate-600">We will send you a reset link.</p>
+      <p class="text-sm text-slate-600">We will send you a reset code by email.</p>
     </div>
 
     <ForgotPasswordForm />
