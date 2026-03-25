@@ -46,17 +46,6 @@ const activeMenu = computed<DashboardMenuKey>(() => {
 
 const recipes = ref<RecipeItem[]>([])
 
-const localMealPlanEntries = ref<MealPlanEntry[]>([
-  {
-    id: 'meal-1',
-    day: 'Monday',
-    mealName: 'Chicken Stir Fry',
-    servings: 2,
-    ingredients: ['Chicken breast', 'Bell pepper', 'Garlic'],
-    cooked: false,
-  },
-])
-
 const localShoppingItems = ref<ShoppingItem[]>([
   {
     id: 'shop-1',
@@ -68,14 +57,12 @@ const localShoppingItems = ref<ShoppingItem[]>([
   },
 ])
 
-const remoteMealPlanEntries = ref<MealPlanEntry[]>([])
 const remoteShoppingItems = ref<ShoppingItem[]>([])
-const shouldUseRemoteMealPlans = computed(() =>
+const isMealPlannerRemoteReady = computed(() =>
   hasApiBaseUrl && sessionReady.value && isAuthenticated.value)
 const shouldUseRemoteShoppingItems = computed(() =>
   hasApiBaseUrl && sessionReady.value && isAuthenticated.value)
-const mealPlanEntries = computed(() =>
-  shouldUseRemoteMealPlans.value ? remoteMealPlanEntries.value : localMealPlanEntries.value)
+const mealPlanEntries = computed<MealPlanEntry[]>(() => mealPlansQuery.data.value?.items ?? [])
 const shoppingItems = computed(() =>
   shouldUseRemoteShoppingItems.value ? remoteShoppingItems.value : localShoppingItems.value)
 const shoppingActionError = ref('')
@@ -280,7 +267,7 @@ const mealPlansQuery = useQuery({
   queryKey: ['meal-plans', 20, 0],
   queryFn: () => mealPlanService.getMealPlans({ limit: 20, offset: 0 }),
   enabled: computed(() =>
-    shouldUseRemoteMealPlans.value
+    isMealPlannerRemoteReady.value
     && (activeMenu.value === 'meal-planner' || activeMenu.value === 'shopping-list')),
 })
 
@@ -372,15 +359,6 @@ watch(
 )
 
 watch(
-  () => mealPlansQuery.data.value,
-  (data) => {
-    if (!data) return
-    remoteMealPlanEntries.value = data.items
-  },
-  { immediate: true },
-)
-
-watch(
   () => shoppingItemsQuery.data.value,
   (data) => {
     if (!data) return
@@ -429,21 +407,7 @@ const deleteRecipe = async (id: string) => {
 }
 
 const saveMealPlanEntry = async (payload: MealPlanPayload) => {
-  if (!shouldUseRemoteMealPlans.value) {
-    if (payload.id) {
-      localMealPlanEntries.value = localMealPlanEntries.value.map((entry) =>
-        entry.id === payload.id
-          ? { ...entry, ...payload, id: payload.id, cooked: entry.cooked }
-          : entry,
-      )
-      return
-    }
-
-    localMealPlanEntries.value.unshift({
-      id: crypto.randomUUID(),
-      ...payload,
-      cooked: false,
-    })
+  if (!isMealPlannerRemoteReady.value) {
     return
   }
 
@@ -458,8 +422,7 @@ const saveMealPlanEntry = async (payload: MealPlanPayload) => {
 }
 
 const deleteMealPlanEntry = async (id: string) => {
-  if (!shouldUseRemoteMealPlans.value) {
-    localMealPlanEntries.value = localMealPlanEntries.value.filter((entry) => entry.id !== id)
+  if (!isMealPlannerRemoteReady.value) {
     return
   }
 
@@ -467,10 +430,7 @@ const deleteMealPlanEntry = async (id: string) => {
 }
 
 const toggleMealCooked = async (id: string) => {
-  if (!shouldUseRemoteMealPlans.value) {
-    localMealPlanEntries.value = localMealPlanEntries.value.map((entry) =>
-      entry.id === id ? { ...entry, cooked: !entry.cooked } : entry,
-    )
+  if (!isMealPlannerRemoteReady.value) {
     return
   }
 
@@ -506,6 +466,7 @@ const toggleMealCooked = async (id: string) => {
   <AppMealPlannerPanel
     v-else-if="activeMenu === 'meal-planner'"
     :entries="mealPlanEntries"
+    :is-disabled="!isMealPlannerRemoteReady"
     :is-loading="mealPlansQuery.isPending.value || saveMealPlanMutation.isPending.value || deleteMealPlanMutation.isPending.value"
     :error-message="mealPlanErrorMessage"
     @save-entry="saveMealPlanEntry"

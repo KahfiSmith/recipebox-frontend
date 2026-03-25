@@ -8,6 +8,7 @@ import { isMinLength } from '@/shared/lib/validators'
 const props = defineProps<{
   entries: MealPlanEntry[]
   isLoading?: boolean
+  isDisabled?: boolean
   errorMessage?: string
 }>()
 
@@ -46,6 +47,10 @@ const toIngredients = (value: string) =>
     .filter(Boolean)
 
 const handleSubmit = () => {
+  if (props.isDisabled) {
+    return
+  }
+
   error.value = ''
 
   if (!isMinLength(form.mealName.trim(), 2)) {
@@ -76,6 +81,10 @@ const handleSubmit = () => {
 }
 
 const handleEdit = (entry: MealPlanEntry) => {
+  if (props.isDisabled) {
+    return
+  }
+
   editingId.value = entry.id
   form.day = entry.day
   form.mealName = entry.mealName
@@ -85,6 +94,10 @@ const handleEdit = (entry: MealPlanEntry) => {
 }
 
 const handleSendIngredients = (entry: MealPlanEntry) => {
+  if (props.isDisabled) {
+    return
+  }
+
   emit('add-ingredients', {
     mealName: entry.mealName,
     ingredients: entry.ingredients,
@@ -120,6 +133,7 @@ const handleSendIngredients = (entry: MealPlanEntry) => {
           Day
           <select
             v-model="form.day"
+            :disabled="props.isDisabled"
             class="mt-2 w-full rounded-lg border border-recipe-sand bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-recipe-mint focus:ring-2 focus:ring-recipe-mint-w60 focus:ring-offset-1"
           >
             <option>Monday</option>
@@ -132,10 +146,26 @@ const handleSendIngredients = (entry: MealPlanEntry) => {
           </select>
         </label>
 
-        <Input v-model="form.mealName" label="Meal name" name="meal-name" placeholder="Chicken Stir Fry" required />
-        <Input v-model="form.servings" type="number" min="1" label="Servings" name="servings" required />
+        <Input
+          v-model="form.mealName"
+          :disabled="props.isDisabled"
+          label="Meal name"
+          name="meal-name"
+          placeholder="Chicken Stir Fry"
+          required
+        />
+        <Input
+          v-model="form.servings"
+          :disabled="props.isDisabled"
+          type="number"
+          min="1"
+          label="Servings"
+          name="servings"
+          required
+        />
         <Input
           v-model="form.ingredientsText"
+          :disabled="props.isDisabled"
           label="Ingredients (comma separated)"
           name="ingredients"
           placeholder="Chicken breast, bell pepper, garlic"
@@ -150,8 +180,8 @@ const handleSendIngredients = (entry: MealPlanEntry) => {
         </p>
 
         <div class="sm:col-span-2 flex flex-wrap gap-3">
-          <Button>{{ editingId ? 'Update meal' : 'Save meal' }}</Button>
-          <Button type="button" variant="ghost" @click="resetForm">Reset</Button>
+          <Button :disabled="props.isDisabled">{{ editingId ? 'Update meal' : 'Save meal' }}</Button>
+          <Button :disabled="props.isDisabled" type="button" variant="ghost" @click="resetForm">Reset</Button>
         </div>
       </form>
     </section>
@@ -164,13 +194,6 @@ const handleSendIngredients = (entry: MealPlanEntry) => {
         class="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
       >
         {{ props.errorMessage }}
-      </p>
-
-      <p
-        v-if="props.isLoading"
-        class="mt-4 rounded-lg border border-recipe-sand-b10 bg-recipe-sand-w75 px-3 py-2 text-sm text-slate-600"
-      >
-        Syncing meal plans with database...
       </p>
 
       <div v-if="entries.length" class="mt-4 space-y-3">
@@ -195,12 +218,16 @@ const handleSendIngredients = (entry: MealPlanEntry) => {
           </div>
 
           <div class="mt-3 flex flex-wrap gap-2">
-            <Button size="sm" variant="secondary" @click="handleEdit(entry)">Edit</Button>
-            <Button size="sm" variant="ghost" @click="emit('toggle-cooked', entry.id)">
+            <Button :disabled="props.isDisabled" size="sm" variant="secondary" @click="handleEdit(entry)">Edit</Button>
+            <Button :disabled="props.isDisabled" size="sm" variant="ghost" @click="emit('toggle-cooked', entry.id)">
               {{ entry.cooked ? 'Mark planned' : 'Mark cooked' }}
             </Button>
-            <Button size="sm" variant="ghost" @click="handleSendIngredients(entry)">To shopping</Button>
-            <Button size="sm" variant="ghost" @click="emit('delete-entry', entry.id)">Delete</Button>
+            <Button :disabled="props.isDisabled" size="sm" variant="ghost" @click="handleSendIngredients(entry)">
+              To shopping
+            </Button>
+            <Button :disabled="props.isDisabled" size="sm" variant="ghost" @click="emit('delete-entry', entry.id)">
+              Delete
+            </Button>
           </div>
         </article>
       </div>
