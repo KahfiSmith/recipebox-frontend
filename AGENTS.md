@@ -65,6 +65,7 @@ Aturan penempatan:
 - Endpoint API didefinisikan terpusat di `src/shared/services/api/index.ts`.
 - Meal planner di `/app` harus menampilkan data dari backend/database saja; jika `VITE_API_BASE_URL` atau session belum tersedia, tampilkan state kosong/disabled dan jangan fallback ke state lokal.
 - Flow auth frontend saat ini sudah mencakup `register`, `login`, `verify-email/request`, `verify-email/confirm`, `password/forgot`, `password/reset`, `refresh`, `logout`, dan `me` pada layer service.
+- Flow forgot password harus tetap terpisah dari verify email akun; kirim user dari forgot password ke layar reset password, lalu input kode reset dari email di layar reset, bukan di layar verify email.
 - Saat `VITE_API_BASE_URL` kosong, flow auth development tetap harus usable lewat mock response yang aman untuk login dan mock success message untuk form auth lain.
 - Store auth saat ini memulihkan snapshot session tab aktif dari `sessionStorage`, menyimpan access token di state Pinia saat runtime, dan mencoba restore/sinkronisasi session via `/auth/refresh` + `/auth/me` ketika API tersedia; untuk persistence tambahan di luar kebutuhan reload tab, lakukan hanya dengan tugas yang eksplisit.
 - Untuk auth payload/response yang datang dari atau dikirim ke backend, validasi di boundary service dengan Zod sebelum data dipakai lebih jauh.
