@@ -207,11 +207,7 @@ const toggleGroup = (groupName: string) => {
     <section class="rounded-2xl border border-recipe-sand-b10 bg-white p-6 shadow-sm">
       <h2 class="text-lg font-semibold text-recipe-ink">Items by menu</h2>
 
-      <p v-if="props.isLoading && !items.length" class="mt-4 text-sm text-slate-500">
-        Loading shopping items...
-      </p>
-
-      <div v-else-if="items.length" class="mt-4 space-y-4">
+      <div v-if="items.length" class="mt-4 space-y-4">
         <article
           v-for="group in groupedItems"
           :key="group.groupName"
@@ -272,7 +268,7 @@ const toggleGroup = (groupName: string) => {
         </article>
       </div>
 
-      <p v-else class="mt-4 text-sm text-slate-500">No shopping items yet.</p>
+      <p v-else-if="!props.isLoading" class="mt-4 text-sm text-slate-500">No shopping items yet.</p>
     </section>
   </div>
 </template>
