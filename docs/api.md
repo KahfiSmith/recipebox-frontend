@@ -97,6 +97,9 @@ Normalisasi response yang saat ini didukung frontend:
   - `data.user` + `data.tokens.accessToken`
 - Jika `POST /auth/refresh` tidak mengembalikan user, frontend akan memanggil `GET /auth/me`.
 - `POST /auth/register` saat ini mengharapkan sukses dalam bentuk `data.user`.
+- `POST /auth/password/reset` saat ini mengirim payload:
+  - `token`
+  - `newPassword`
 - `GET /auth/me` menerima:
   - `data.user`
   - `data` langsung berisi user

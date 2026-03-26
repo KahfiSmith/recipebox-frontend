@@ -11,10 +11,15 @@ import { getZodErrorMessage } from '@/shared/lib/validators'
 const route = useRoute()
 const router = useRouter()
 const emailHint = typeof route.query.email === 'string' ? route.query.email : ''
+const codeFromQuery = typeof route.query.code === 'string'
+  ? route.query.code
+  : typeof route.query.token === 'string'
+    ? route.query.token
+    : ''
 
 const form = reactive({
-  token: typeof route.query.token === 'string' ? route.query.token : '',
-  password: '',
+  token: codeFromQuery,
+  newPassword: '',
   confirmPassword: '',
 })
 
@@ -45,12 +50,12 @@ const handleSubmit = async () => {
   try {
     const payload = {
       token: validation.data.token,
-      password: validation.data.password,
+      newPassword: validation.data.newPassword,
     }
     const response = await resetPasswordMutation.mutateAsync(payload)
 
     success.value = response.message
-    form.password = ''
+    form.newPassword = ''
     form.confirmPassword = ''
 
     window.setTimeout(() => {
@@ -85,9 +90,9 @@ const handleSubmit = async () => {
     <p class="text-xs text-slate-500">{{ tokenHint }}</p>
 
     <Input
-      v-model="form.password"
+      v-model="form.newPassword"
       label="New password"
-      name="password"
+      name="newPassword"
       type="password"
       placeholder="••••••••"
       autocomplete="new-password"
