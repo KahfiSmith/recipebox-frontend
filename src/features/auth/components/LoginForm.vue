@@ -23,6 +23,12 @@ const loginMutation = useMutation({
 })
 const isSubmitting = computed(() => loginMutation.isPending.value)
 
+const emailQuery = route.query.email
+
+if (typeof emailQuery === 'string') {
+  form.email = emailQuery
+}
+
 const handleSubmit = async () => {
   error.value = ''
 
