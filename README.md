@@ -17,6 +17,7 @@ Frontend untuk aplikasi Recipebox berbasis Vue 3 + Vite + TypeScript dengan stru
 - Form auth memakai TanStack Query mutation untuk lifecycle request, sementara state session/auth tetap bersumber dari Pinia.
 - Saat `VITE_API_BASE_URL` tersedia, session auth mencoba dipulihkan dari snapshot `sessionStorage` pada tab aktif lalu disinkronkan lewat `/auth/refresh` dan `/auth/me`.
 - Saat `VITE_API_BASE_URL` kosong, login memakai mock session aman dan form auth lain mengembalikan mock success response agar flow development tetap usable.
+- Register, reset password, dan update password di profile memakai minimum 8 karakter agar selaras dengan aturan backend.
 - Forgot password mengirim user ke layar reset password setelah request sukses; user memasukkan kode reset dari email di layar reset, terpisah dari flow verify email akun.
 - Route guard aktif untuk `requiresAuth` dan `guestOnly`.
 - Workspace `/app` memakai backend untuk overview summary (`GET /dashboard`), recipes (`GET/POST/PUT/DELETE /recipes`), meal plans (`GET/POST/PUT/DELETE /meal-plans`), dan shopping list (`GET/POST/PUT/DELETE /shopping-items`) saat API tersedia.

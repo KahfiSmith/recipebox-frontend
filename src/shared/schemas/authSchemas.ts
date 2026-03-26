@@ -109,7 +109,7 @@ export const loginPayloadSchema = z.object({
 export const registerPayloadSchema = z.object({
   name: nonEmptyTrimmedSchema('Name is required').min(2, 'Name must be at least 2 characters'),
   email: emailSchema,
-  password: minLengthSchema(6, 'Password must be at least 6 characters'),
+  password: minLengthSchema(8, 'Password must be at least 8 characters'),
 })
 
 export const forgotPasswordPayloadSchema = z.object({
