@@ -6,13 +6,65 @@ import { setAccessToken, setAuthHandlers } from '@/shared/services/httpClient'
 import type { AuthResponse, LoginPayload, User } from '@/shared/types/api.types'
 
 const hasApiBaseUrl = Boolean(import.meta.env.VITE_API_BASE_URL)
+const AUTH_SESSION_STORAGE_KEY = 'recipebox.auth.session'
+
+interface PersistedAuthSession {
+  accessToken: string
+  user: User
+}
+
+const readPersistedSession = (): PersistedAuthSession | null => {
+  if (typeof window === 'undefined') return null
+
+  const rawValue = window.sessionStorage.getItem(AUTH_SESSION_STORAGE_KEY)
+  if (!rawValue) return null
+
+  try {
+    const parsed = JSON.parse(rawValue) as Partial<PersistedAuthSession>
+
+    if (
+      typeof parsed.accessToken !== 'string'
+      || !parsed.accessToken
+      || !parsed.user
+      || typeof parsed.user.id !== 'string'
+      || typeof parsed.user.name !== 'string'
+      || typeof parsed.user.email !== 'string'
+    ) {
+      window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY)
+      return null
+    }
+
+    return {
+      accessToken: parsed.accessToken,
+      user: parsed.user,
+    }
+  } catch {
+    window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY)
+    return null
+  }
+}
+
+const writePersistedSession = (session: PersistedAuthSession) => {
+  if (typeof window === 'undefined') return
+
+  window.sessionStorage.setItem(AUTH_SESSION_STORAGE_KEY, JSON.stringify(session))
+}
+
+const clearPersistedSession = () => {
+  if (typeof window === 'undefined') return
+
+  window.sessionStorage.removeItem(AUTH_SESSION_STORAGE_KEY)
+}
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null)
-  const accessToken = ref<string | null>(null)
+  const persistedSession = readPersistedSession()
+  const user = ref<User | null>(persistedSession?.user ?? null)
+  const accessToken = ref<string | null>(persistedSession?.accessToken ?? null)
   const sessionReady = ref(false)
   let initializationPromise: Promise<void> | null = null
   let refreshPromise: Promise<void> | null = null
+
+  setAccessToken(accessToken.value)
 
   const isAuthenticated = computed(() => Boolean(accessToken.value && user.value))
 
@@ -20,12 +72,20 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken.value = response.accessToken
     setAccessToken(response.accessToken)
     user.value = response.user ?? await authService.getCurrentUser()
+
+    if (user.value) {
+      writePersistedSession({
+        accessToken: response.accessToken,
+        user: user.value,
+      })
+    }
   }
 
   const clearSession = () => {
     accessToken.value = null
     user.value = null
     setAccessToken(null)
+    clearPersistedSession()
   }
 
   const redirectToLogin = () => {
@@ -90,7 +150,9 @@ export const useAuthStore = defineStore('auth', () => {
       try {
         await refreshSession()
       } catch {
-        clearSession()
+        if (!accessToken.value || !user.value) {
+          clearSession()
+        }
       } finally {
         sessionReady.value = true
         initializationPromise = null

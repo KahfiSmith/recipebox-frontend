@@ -29,8 +29,7 @@ export interface VerifyEmailRequestPayload {
 }
 
 export interface VerifyEmailConfirmPayload {
-  email: string
-  code: string
+  token: string
 }
 
 export interface ForgotPasswordPayload {
@@ -39,7 +38,7 @@ export interface ForgotPasswordPayload {
 
 export interface ResetPasswordPayload {
   token: string
-  password: string
+  newPassword: string
 }
 
 export interface ApiMessageResponse {

@@ -48,6 +48,7 @@ export interface MealPlanPayload {
   mealName: string
   servings: number
   ingredients: string[]
+  cooked?: boolean
 }
 
 export interface AddIngredientsPayload {
@@ -68,5 +69,7 @@ export interface ShoppingPayload {
   id?: string
   name: string
   qty: string
+  checked?: boolean
+  source?: 'manual' | 'meal-plan'
   sourceLabel?: string
 }

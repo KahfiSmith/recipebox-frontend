@@ -57,13 +57,13 @@ const handlePasswordSave = () => {
   passwordError.value = ''
   passwordSuccess.value = ''
 
-  if (!isMinLength(passwordForm.currentPassword, 6)) {
+  if (!passwordForm.currentPassword.trim()) {
     passwordError.value = 'Current password is required'
     return
   }
 
-  if (!isMinLength(passwordForm.newPassword, 6)) {
-    passwordError.value = 'New password must be at least 6 characters'
+  if (!isMinLength(passwordForm.newPassword, 8)) {
+    passwordError.value = 'New password must be at least 8 characters'
     return
   }
 

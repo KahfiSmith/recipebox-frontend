@@ -9,7 +9,7 @@ import ResetPasswordForm from '@/features/auth/components/ResetPasswordForm.vue'
         Authentication
       </p>
       <h1 class="text-2xl font-semibold text-recipe-ink">Reset your password</h1>
-      <p class="text-sm text-slate-600">Use the token from your email to choose a new password.</p>
+      <p class="text-sm text-slate-600">Use the reset code from your email to choose a new password.</p>
     </div>
 
     <ResetPasswordForm />

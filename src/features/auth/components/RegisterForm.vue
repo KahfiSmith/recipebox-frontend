@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useMutation } from '@tanstack/vue-query'
 import { computed, reactive, ref } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 
 import { registerFormSchema } from '@/shared/schemas/authSchemas'
 import { authService } from '@/features/auth/services/authService'
@@ -17,6 +17,7 @@ const form = reactive({
 
 const error = ref('')
 const success = ref('')
+const router = useRouter()
 const registerMutation = useMutation({
   mutationFn: authService.register,
 })
@@ -40,10 +41,17 @@ const handleSubmit = async () => {
       password: validation.data.password,
     }
     const response = await registerMutation.mutateAsync(payload)
+    const registeredEmail = validation.data.email.trim()
 
     success.value = response.message
     form.password = ''
     form.confirmPassword = ''
+    window.setTimeout(() => {
+      router.push({
+        name: 'verify-email',
+        query: { email: registeredEmail },
+      })
+    }, 900)
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Registration failed'
   }

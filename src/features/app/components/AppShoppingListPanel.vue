@@ -5,10 +5,15 @@ import type { ShoppingItem, ShoppingPayload } from '@/features/app/types'
 import { Button, Input } from '@/shared/components/ui'
 import { isMinLength } from '@/shared/lib/validators'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   items: ShoppingItem[]
   menuOptions: string[]
-}>()
+  isLoading?: boolean
+  errorMessage?: string
+}>(), {
+  isLoading: false,
+  errorMessage: '',
+})
 
 const emit = defineEmits<{
   (e: 'save-item', payload: ShoppingPayload): void
@@ -131,11 +136,18 @@ const toggleGroup = (groupName: string) => {
       <h2 class="text-lg font-semibold text-recipe-ink">
         {{ editingId ? 'Edit item' : 'Add item' }}
       </h2>
+      <p
+        v-if="props.errorMessage"
+        class="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700"
+      >
+        {{ props.errorMessage }}
+      </p>
       <form class="mt-4 grid gap-4 sm:grid-cols-2" @submit.prevent="handleSubmit">
         <label class="block text-sm font-medium text-recipe-ink">
           Menu / Group
           <select
             v-model="form.selectedMenu"
+            :disabled="props.isLoading"
             class="mt-2 w-full rounded-lg border border-recipe-sand bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-recipe-mint focus:ring-2 focus:ring-recipe-mint-w60 focus:ring-offset-1"
           >
             <option v-for="option in menuOptions" :key="option" :value="option">{{ option }}</option>
@@ -145,14 +157,29 @@ const toggleGroup = (groupName: string) => {
         <Input
           v-if="form.selectedMenu === '__new__'"
           v-model="form.newMenuName"
+          :disabled="props.isLoading"
           label="New group name"
           name="new-menu-name"
           placeholder="Pasta Primavera"
           required
         />
         <div v-else class="hidden sm:block"></div>
-        <Input v-model="form.name" label="Item name" name="item-name" placeholder="Chicken breast" required />
-        <Input v-model="form.qty" label="Quantity" name="item-qty" placeholder="500 g" required />
+        <Input
+          v-model="form.name"
+          :disabled="props.isLoading"
+          label="Item name"
+          name="item-name"
+          placeholder="Chicken breast"
+          required
+        />
+        <Input
+          v-model="form.qty"
+          :disabled="props.isLoading"
+          label="Quantity"
+          name="item-qty"
+          placeholder="500 g"
+          required
+        />
 
         <p
           v-if="error"
@@ -162,10 +189,11 @@ const toggleGroup = (groupName: string) => {
         </p>
 
         <div class="sm:col-span-2 flex flex-wrap gap-3">
-          <Button>{{ editingId ? 'Update item' : 'Add item' }}</Button>
-          <Button type="button" variant="ghost" @click="resetForm">Reset</Button>
+          <Button :disabled="props.isLoading">{{ editingId ? 'Update item' : 'Add item' }}</Button>
+          <Button :disabled="props.isLoading" type="button" variant="ghost" @click="resetForm">Reset</Button>
           <Button
             v-if="checkedCount > 0"
+            :disabled="props.isLoading"
             type="button"
             variant="secondary"
             @click="emit('clear-checked')"
@@ -209,6 +237,7 @@ const toggleGroup = (groupName: string) => {
                 <label class="flex items-start gap-3">
                   <input
                     :checked="item.checked"
+                    :disabled="props.isLoading"
                     type="checkbox"
                     class="mt-0.5 h-4 w-4 rounded border-recipe-sand text-recipe-orange focus:ring-recipe-mint"
                     @change="emit('toggle-item', item.id)"
@@ -231,15 +260,15 @@ const toggleGroup = (groupName: string) => {
               </div>
 
               <div class="mt-3 flex flex-wrap gap-2">
-                <Button size="sm" variant="secondary" @click="handleEdit(item)">Edit</Button>
-                <Button size="sm" variant="ghost" @click="emit('delete-item', item.id)">Delete</Button>
+                <Button :disabled="props.isLoading" size="sm" variant="secondary" @click="handleEdit(item)">Edit</Button>
+                <Button :disabled="props.isLoading" size="sm" variant="ghost" @click="emit('delete-item', item.id)">Delete</Button>
               </div>
             </article>
           </div>
         </article>
       </div>
 
-      <p v-else class="mt-4 text-sm text-slate-500">No shopping items yet.</p>
+      <p v-else-if="!props.isLoading" class="mt-4 text-sm text-slate-500">No shopping items yet.</p>
     </section>
   </div>
 </template>

@@ -10,10 +10,16 @@ import { getZodErrorMessage } from '@/shared/lib/validators'
 
 const route = useRoute()
 const router = useRouter()
+const emailHint = typeof route.query.email === 'string' ? route.query.email : ''
+const codeFromQuery = typeof route.query.code === 'string'
+  ? route.query.code
+  : typeof route.query.token === 'string'
+    ? route.query.token
+    : ''
 
 const form = reactive({
-  token: typeof route.query.token === 'string' ? route.query.token : '',
-  password: '',
+  token: codeFromQuery,
+  newPassword: '',
   confirmPassword: '',
 })
 
@@ -26,8 +32,8 @@ const isSubmitting = computed(() => resetPasswordMutation.isPending.value)
 
 const tokenHint = computed(() =>
   form.token
-    ? 'Reset token loaded from the URL. You can replace it if needed.'
-    : 'Paste the reset token from your email if the URL did not include it.',
+    ? 'Reset code loaded from the URL. You can replace it if needed.'
+    : 'Paste the reset code from your email.',
 )
 
 const handleSubmit = async () => {
@@ -44,12 +50,12 @@ const handleSubmit = async () => {
   try {
     const payload = {
       token: validation.data.token,
-      password: validation.data.password,
+      newPassword: validation.data.newPassword,
     }
     const response = await resetPasswordMutation.mutateAsync(payload)
 
     success.value = response.message
-    form.password = ''
+    form.newPassword = ''
     form.confirmPassword = ''
 
     window.setTimeout(() => {
@@ -66,23 +72,27 @@ const handleSubmit = async () => {
     <div class="space-y-2">
       <h1 class="text-2xl font-semibold text-slate-900">Set a new password</h1>
       <p class="text-sm text-slate-600">
-        Use the reset token from your email, then choose a new password.
+        Paste the reset code from your email, then choose a new password.
       </p>
     </div>
 
+    <p v-if="emailHint" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm text-blue-700">
+      Reset code sent to {{ emailHint }}.
+    </p>
+
     <Input
       v-model="form.token"
-      label="Reset token"
+      label="Reset code"
       name="token"
-      placeholder="Paste your reset token"
+      placeholder="Paste your reset code"
       required
     />
     <p class="text-xs text-slate-500">{{ tokenHint }}</p>
 
     <Input
-      v-model="form.password"
+      v-model="form.newPassword"
       label="New password"
-      name="password"
+      name="newPassword"
       type="password"
       placeholder="••••••••"
       autocomplete="new-password"

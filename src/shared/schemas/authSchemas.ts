@@ -109,7 +109,7 @@ export const loginPayloadSchema = z.object({
 export const registerPayloadSchema = z.object({
   name: nonEmptyTrimmedSchema('Name is required').min(2, 'Name must be at least 2 characters'),
   email: emailSchema,
-  password: minLengthSchema(6, 'Password must be at least 6 characters'),
+  password: minLengthSchema(8, 'Password must be at least 8 characters'),
 })
 
 export const forgotPasswordPayloadSchema = z.object({
@@ -121,14 +121,12 @@ export const verifyEmailRequestPayloadSchema = z.object({
 })
 
 export const verifyEmailConfirmPayloadSchema = z.object({
-  email: emailSchema,
-  code: nonEmptyTrimmedSchema('Verification code is required')
-    .min(6, 'Verification code must be at least 6 characters'),
+  token: nonEmptyTrimmedSchema('Verification token is required'),
 })
 
 export const resetPasswordPayloadSchema = z.object({
-  token: nonEmptyTrimmedSchema('Reset token is required').min(6, 'Reset token is required'),
-  password: minLengthSchema(6, 'New password must be at least 6 characters'),
+  token: nonEmptyTrimmedSchema('Reset code is required').min(6, 'Reset code is required'),
+  newPassword: minLengthSchema(8, 'New password must be at least 8 characters'),
 })
 
 export const registerFormSchema = registerPayloadSchema.extend({
@@ -140,7 +138,7 @@ export const registerFormSchema = registerPayloadSchema.extend({
 
 export const resetPasswordFormSchema = resetPasswordPayloadSchema.extend({
   confirmPassword: z.string(),
-}).refine((value) => value.password === value.confirmPassword, {
+}).refine((value) => value.newPassword === value.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword'],
 })

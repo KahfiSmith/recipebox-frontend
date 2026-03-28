@@ -139,7 +139,7 @@ export const authService = {
     const validatedPayload = parseWithSchema(
       verifyEmailConfirmPayloadSchema,
       payload,
-      'Invalid email verification payload',
+      'Invalid email verification token',
     )
 
     if (!hasApiBaseUrl) {

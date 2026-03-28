@@ -39,6 +39,9 @@ export class HttpError extends Error {
   }
 }
 
+const isAbortError = (error: unknown) =>
+  error instanceof DOMException && error.name === 'AbortError'
+
 const toQueryString = (query?: RequestOptions<unknown>['query']) => {
   if (!query) return ''
   const params = new URLSearchParams()
@@ -119,13 +122,26 @@ async function request<TResponse = unknown, TBody = unknown>(
     requestHeaders.set('Authorization', `Bearer ${accessToken}`)
   }
 
-  const response = await fetch(url, {
-    method,
-    body: body ? JSON.stringify(body) : undefined,
-    credentials: 'include',
-    headers: requestHeaders,
-    ...rest,
-  })
+  let response: Response
+
+  try {
+    response = await fetch(url, {
+      method,
+      body: body ? JSON.stringify(body) : undefined,
+      credentials: 'include',
+      headers: requestHeaders,
+      ...rest,
+    })
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw error
+    }
+
+    throw new HttpError(
+      `Unable to reach API at ${url}. Check VITE_API_BASE_URL, backend server, and CORS configuration.`,
+      0,
+    )
+  }
 
   if (!response.ok) {
     if (

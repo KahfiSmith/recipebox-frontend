@@ -60,7 +60,6 @@ Implikasinya:
   - `POST /api/v1/recipes`
   - `PUT /api/v1/recipes/{id}`
   - `DELETE /api/v1/recipes/{id}`
-- Belum dipakai frontend dan masih menjadi target kontrak backend:
   - `GET /api/v1/meal-plans`
   - `POST /api/v1/meal-plans`
   - `PUT /api/v1/meal-plans/{id}`
@@ -69,6 +68,8 @@ Implikasinya:
   - `POST /api/v1/shopping-items`
   - `PUT /api/v1/shopping-items/{id}`
   - `DELETE /api/v1/shopping-items/{id}`
+- Belum dipakai frontend dan masih menjadi target kontrak backend:
+  - Tidak ada pada kelompok endpoint utama saat ini.
 
 ## Pagination
 - List endpoints support query params:
@@ -96,6 +97,13 @@ Normalisasi response yang saat ini didukung frontend:
   - `data.user` + `data.tokens.accessToken`
 - Jika `POST /auth/refresh` tidak mengembalikan user, frontend akan memanggil `GET /auth/me`.
 - `POST /auth/register` saat ini mengharapkan sukses dalam bentuk `data.user`.
+- Frontend saat ini mengasumsikan flow verifikasi email berbasis link. Setelah register sukses, user diarahkan ke halaman `/auth/verify-email?email=...` di frontend sebagai status/check-inbox page.
+- Jika halaman `/auth/verify-email` dibuka dengan query `?token=...`, frontend akan langsung memanggil `POST /auth/verify-email/confirm` dengan payload:
+  - `token`
+- Tanda verifikasi email sukses dari sisi frontend adalah endpoint confirm mengembalikan sukses, misalnya `{"message":"email verified"}`, lalu user dapat login tanpa lagi kena error `email is not verified`.
+- `POST /auth/password/reset` saat ini mengirim payload:
+  - `token`
+  - `newPassword`
 - `GET /auth/me` menerima:
   - `data.user`
   - `data` langsung berisi user
@@ -128,3 +136,55 @@ Normalisasi response yang saat ini didukung frontend:
   - `name`
   - `category`
   - salah satu dari `prepTime`, `prepTimeMinutes`, atau `prep_time_minutes`
+
+## Meal Plan Response Notes
+
+- Frontend menerima response list meal plan dalam beberapa bentuk berikut:
+  - `data` berupa array meal plan langsung
+  - `data.mealPlans` + metadata pagination opsional
+  - `data.items` + metadata pagination opsional
+  - bentuk top-level setara tanpa wrapper `data`
+- Frontend menerima response create/update meal plan dalam beberapa bentuk berikut:
+  - `data` langsung berisi meal plan
+  - `data.mealPlan`
+  - meal plan langsung di top-level
+- Field meal plan minimum yang dipakai frontend:
+  - `id`
+  - `day`
+  - salah satu dari `mealName`, `meal_name`, `name`, atau `title`
+  - salah satu dari `servings`, `servingCount`, atau `serving_count`
+  - salah satu dari `ingredients`, `ingredientNames`, atau `ingredient_names`
+  - salah satu dari `cooked`, `isCooked`, atau `is_cooked`
+- Frontend saat ini mengirim payload create/update meal plan dalam bentuk:
+  - `day`
+  - `mealName`
+  - `servings`
+  - `ingredients`
+  - `cooked`
+
+## Shopping List Response Notes
+
+- Frontend menerima response list shopping list dalam beberapa bentuk berikut:
+  - `data` berupa array shopping item langsung
+  - `data.shoppingItems` + metadata pagination opsional
+  - `data.shoppingLists` + metadata pagination opsional
+  - `data.items` + metadata pagination opsional
+  - bentuk top-level setara tanpa wrapper `data`
+- Frontend menerima response create/update shopping item dalam beberapa bentuk berikut:
+  - `data` langsung berisi shopping item
+  - `data.shoppingItem`
+  - `data.shoppingList`
+  - shopping item langsung di top-level
+- Field shopping item minimum yang dipakai frontend:
+  - `id`
+  - salah satu dari `name`, `itemName`, `item_name`, atau `title`
+  - salah satu dari `qty`, `quantity`, atau `amount`
+  - opsional salah satu dari `checked`, `isChecked`, atau `is_checked`
+  - opsional salah satu dari `source`, `sourceType`, atau `source_type`
+  - opsional salah satu dari `sourceLabel`, `source_label`, `group`, `groupName`, `group_name`, `menuName`, atau `menu_name`
+- Frontend saat ini mengirim payload create/update shopping item dalam bentuk:
+  - `name`
+  - `qty`
+  - `checked`
+  - `source`
+  - `sourceLabel`
