@@ -121,9 +121,7 @@ export const verifyEmailRequestPayloadSchema = z.object({
 })
 
 export const verifyEmailConfirmPayloadSchema = z.object({
-  email: emailSchema,
-  code: nonEmptyTrimmedSchema('Verification code is required')
-    .min(6, 'Verification code must be at least 6 characters'),
+  token: nonEmptyTrimmedSchema('Verification token is required'),
 })
 
 export const resetPasswordPayloadSchema = z.object({
