@@ -48,7 +48,7 @@ const handleSubmit = async () => {
     form.confirmPassword = ''
     window.setTimeout(() => {
       router.push({
-        name: 'login',
+        name: 'verify-email',
         query: { email: registeredEmail },
       })
     }, 900)
