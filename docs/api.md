@@ -97,6 +97,10 @@ Normalisasi response yang saat ini didukung frontend:
   - `data.user` + `data.tokens.accessToken`
 - Jika `POST /auth/refresh` tidak mengembalikan user, frontend akan memanggil `GET /auth/me`.
 - `POST /auth/register` saat ini mengharapkan sukses dalam bentuk `data.user`.
+- Frontend saat ini mengasumsikan flow verifikasi email berbasis link. Setelah register sukses, user diarahkan ke halaman `/auth/verify-email?email=...` di frontend sebagai status/check-inbox page.
+- Jika halaman `/auth/verify-email` dibuka dengan query `?token=...`, frontend akan langsung memanggil `POST /auth/verify-email/confirm` dengan payload:
+  - `token`
+- Tanda verifikasi email sukses dari sisi frontend adalah endpoint confirm mengembalikan sukses, misalnya `{"message":"email verified"}`, lalu user dapat login tanpa lagi kena error `email is not verified`.
 - `POST /auth/password/reset` saat ini mengirim payload:
   - `token`
   - `newPassword`

@@ -15,6 +15,7 @@ Frontend untuk aplikasi Recipebox berbasis Vue 3 + Vite + TypeScript dengan stru
 - Landing page `/` sudah berisi section Hero, Features, How it works, Preview, Benefits, CTA, dan Footer.
 - Auth flow sudah terhubung ke `authService`: `login`, `register`, `verify-email/request`, `verify-email/confirm`, `password/forgot`, `password/reset`, `refresh`, `logout`, dan `me`.
 - Form auth memakai TanStack Query mutation untuk lifecycle request, sementara state session/auth tetap bersumber dari Pinia.
+- Setelah register sukses, frontend mengarahkan user ke halaman verify email bergaya status/check-inbox. Jika halaman ini dibuka dengan query `?token=...`, frontend akan otomatis memanggil endpoint confirm verify email ke backend.
 - Saat `VITE_API_BASE_URL` tersedia, session auth mencoba dipulihkan dari snapshot `sessionStorage` pada tab aktif lalu disinkronkan lewat `/auth/refresh` dan `/auth/me`.
 - Saat `VITE_API_BASE_URL` kosong, login memakai mock session aman dan form auth lain mengembalikan mock success response agar flow development tetap usable.
 - Register, reset password, dan update password di profile memakai minimum 8 karakter agar selaras dengan aturan backend.
